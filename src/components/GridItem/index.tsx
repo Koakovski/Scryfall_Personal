@@ -3,7 +3,7 @@ import { FC, PropsWithChildren } from "react";
 const GridItem: FC<PropsWithChildren> = ({ children }) => {
   return (
     <div
-      className={`rounded-lg overflow-hidden flex items-center justify-center cursor-pointer`}
+      className={`aspect-[72/100] rounded-lg overflow-hidden flex items-center justify-center`}
     >
       {children}
     </div>
