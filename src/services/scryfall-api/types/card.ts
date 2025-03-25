@@ -66,6 +66,14 @@ export type CardGames = "paper" | "arena" | "mtgo";
 
 export type CardLegality = "legal" | "not_legal" | "restricted" | "banned";
 
+export type CardImageSizes =
+  | "small"
+  | "normal"
+  | "large"
+  | "png"
+  | "art_crop"
+  | "border_crop";
+
 export type CardPrices = {
   usd?: string;
   usd_foil?: string;
@@ -98,7 +106,8 @@ export type Card = {
   layout: CardLayout;
   highres_image: boolean;
   image_status: "missing" | "placeholder" | "lowres" | "highres_scan";
-  image_uris?: Record<string, string>;
+  card_faces?: CardFace[];
+  image_uris?: Record<CardImageSizes, string>;
   mana_cost?: string;
   cmc: number;
   type_line?: string;
@@ -148,4 +157,20 @@ export type Card = {
   prices: CardPrices;
   related_uris?: Record<string, string>;
   purchase_uris?: Record<string, string>;
+};
+
+export type CardFace = {
+  object: "card_face";
+  name: string;
+  mana_cost?: string;
+  type_line?: string;
+  oracle_text?: string;
+  colors?: CardColor[];
+  power?: string;
+  toughness?: string;
+  flavor_text?: string;
+  artist?: string;
+  artist_id?: string;
+  illustration_id?: string;
+  image_uris?: Record<CardImageSizes, string>;
 };

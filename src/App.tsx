@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { searchCardsService } from "./services/scryfall-api/services/cards/serch-cards.service";
 import { Card } from "./services/scryfall-api/types/card";
+import Grid from "./components/Grid";
+import GridItem from "./components/GridItem";
+import CardItem from "./components/Card";
 
 const App = () => {
   const [cards, setCards] = useState<Card[]>([]);
@@ -19,11 +22,13 @@ const App = () => {
   return (
     <div>
       {cards.length ? (
-        <ul>
+        <Grid>
           {cards.map((card) => (
-            <li key={card.id}>{card.name}</li>
+            <GridItem key={card.id}>
+              <CardItem card={card} />
+            </GridItem>
           ))}
-        </ul>
+        </Grid>
       ) : (
         "Carregando..."
       )}
