@@ -1,28 +1,20 @@
 import { FC } from "react";
-import { Card } from "../../services/scryfall-api/types/card";
+import { CardEntity } from "../../domain/entities/card.entity";
 
 type CardItemProps = {
-  card: Card;
+  card: CardEntity;
 };
 
 const CardItem: FC<CardItemProps> = ({ card }) => {
-  const alt = `${card.name} (${card.set_name} #${card.collector_number})`;
-
-  let src = './assets/magic_card_back.png';
-  if (card.card_faces && card.card_faces.length > 0) {
-    const faceWithUri = card.card_faces.find((face) => face.image_uris?.normal);
-    if (faceWithUri) {
-      src = faceWithUri.image_uris!.normal;
-    }
-  }
-
-  if (card.image_uris?.normal) {
-    src = card.image_uris.normal;
-  }
+  const alt = `${card.name} (${card.setName} #${card.collectorNumber})`;
 
   return (
     <div className="w-full h-full flex flex-col items-center">
-      <img src={src} alt={alt} className="w-full h-auto rounded-lg" />
+      <img
+        src={card.normalImageUri}
+        alt={alt}
+        className="w-full h-auto rounded-lg"
+      />
     </div>
   );
 };
