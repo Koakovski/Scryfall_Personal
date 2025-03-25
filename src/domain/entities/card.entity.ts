@@ -24,18 +24,13 @@ export class CardEntity {
   }
 
   get normalImageUri() {
-    let uri = "./assets/magic_card_back.png";
-    if (this.card.card_faces && this.card.card_faces.length > 0) {
-      const faceWithUri = this.card.card_faces.find(
-        (face) => face.image_uris?.normal
-      );
-      if (faceWithUri) {
-        uri = faceWithUri.image_uris!.normal;
-      }
-    }
+    let uri = this.card.image_uris?.normal || "./assets/magic_card_back.png";
 
-    if (this.card.image_uris?.normal) {
-      uri = this.card.image_uris.normal;
+    const faceWithUri = this.card.card_faces?.find(
+      (face) => face.image_uris?.normal
+    );
+    if (faceWithUri) {
+      uri = faceWithUri.image_uris?.normal || uri;
     }
 
     return uri;
