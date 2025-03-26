@@ -32,7 +32,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close, onSelectCard }) => {
       } else {
         setCards([]);
       }
-    }, 300);
+    }, 500);
     return () => clearTimeout(timeOutId);
   }, [query]);
 
