@@ -19,6 +19,20 @@ const App = () => {
     setCards((prev) => prev.filter((currCard) => currCard.id !== card.id));
   };
 
+  const onChangeCard = (oldCard: CardEntity, newCard: CardEntity) => {
+    setCards((prevCards) => {
+      const cardIndex = prevCards.findIndex((card) => card.id === oldCard.id);
+
+      if (cardIndex !== -1) {
+        const updatedCardsList = [...prevCards];
+        updatedCardsList[cardIndex] = newCard;
+        return updatedCardsList;
+      } else {
+        return prevCards;
+      }
+    });
+  };
+
   useEffect(() => {
     (async () => {
       const result = await searchCardsService({ text: "signet" });
@@ -46,7 +60,11 @@ const App = () => {
           </GridItem>
           {cards.map((card) => (
             <GridItem key={card.id}>
-              <DeckCardItemOptions card={card} onDeleteCard={onDeleteCard} />
+              <DeckCardItemOptions
+                card={card}
+                onDeleteCard={onDeleteCard}
+                onChangeCard={onChangeCard}
+              />
             </GridItem>
           ))}
         </Grid>

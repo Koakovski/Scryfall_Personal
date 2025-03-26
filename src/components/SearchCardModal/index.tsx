@@ -61,6 +61,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close, onSelectCard }) => {
             <Grid gridCols="6">
               {cards.map((card) => (
                 <div
+                  key={card.id}
                   onClick={() => {
                     onSelectCard(card);
                     close();

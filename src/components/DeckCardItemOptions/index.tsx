@@ -6,11 +6,13 @@ import ChangeCardVariationModal from "../ChangeCardVariationModal";
 type DeckCardItemOptionsProps = {
   card: CardEntity;
   onDeleteCard: (card: CardEntity) => void;
+  onChangeCard: (oldCard: CardEntity, newCard: CardEntity) => void;
 };
 
 const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
   card,
   onDeleteCard,
+  onChangeCard,
 }) => {
   const [clickCount, setClickCount] = useState(0);
   const [pressStart, setPressStart] = useState<number | null>(null);
@@ -50,7 +52,7 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
         <ChangeCardVariationModal
           card={card}
           close={() => setIsOpen(false)}
-          onChangeCard={() => {}}
+          onChangeCard={onChangeCard}
         />
       )}
 

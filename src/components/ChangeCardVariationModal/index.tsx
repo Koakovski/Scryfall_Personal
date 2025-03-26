@@ -9,7 +9,7 @@ import { searchCardVariationsService } from "../../services/scryfall-api/service
 type ChangeCardVariationModalProps = {
   card: CardEntity;
   close: () => void;
-  onChangeCard: (card: CardEntity) => void;
+  onChangeCard: (oldCard: CardEntity, newCard: CardEntity) => void;
 };
 
 const ChangeCardVariationModal: FC<ChangeCardVariationModalProps> = ({
@@ -50,15 +50,16 @@ const ChangeCardVariationModal: FC<ChangeCardVariationModalProps> = ({
           )}
           {!loading && cards.length > 0 && (
             <Grid gridCols="6">
-              {cards.map((card) => (
+              {cards.map((cardVariation) => (
                 <div
+                  key={cardVariation.id}
                   onClick={() => {
-                    onChangeCard(card);
+                    onChangeCard(card, cardVariation);
                     close();
                   }}
                 >
-                  <GridItem key={card.id}>
-                    <CardItem card={card} />
+                  <GridItem>
+                    <CardItem card={cardVariation} />
                   </GridItem>
                 </div>
               ))}
