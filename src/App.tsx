@@ -33,14 +33,15 @@ const App = () => {
     });
   };
 
-  useEffect(() => {
+/*   useEffect(() => {
     (async () => {
+      // POPULATE THE ARRAY TO TESTS
       const result = await searchCardsService({ text: "signet" });
       if (result.success) {
         setCards(result.data.data.map((card) => CardEntity.new(card)));
       }
     })();
-  }, []);
+  }, []); */
 
   return (
     <>
