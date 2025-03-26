@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import Grid from "./components/Grid";
 import GridItem from "./components/GridItem";
-import CardItem from "./components/CardItem";
 import { CardEntity } from "./domain/entities/card.entity";
 import AddCardButton from "./components/AddCardButton";
 import SearchCardModal from "./components/SearchCardModal";
 import { searchCardsService } from "./services/scryfall-api/services/cards/serch-cards.service";
+import DeckCardItemOptions from "./components/DeckCardItemOptions";
 
 const App = () => {
   const [cards, setCards] = useState<CardEntity[]>([]);
@@ -14,6 +14,10 @@ const App = () => {
   function onSelectCard(card: CardEntity) {
     setCards((prev) => [card, ...prev]);
   }
+
+  const onDeleteCard = (card: CardEntity) => {
+    setCards((prev) => prev.filter((currCard) => currCard.id !== card.id));
+  };
 
   useEffect(() => {
     (async () => {
@@ -42,7 +46,7 @@ const App = () => {
           </GridItem>
           {cards.map((card) => (
             <GridItem key={card.id}>
-              <CardItem card={card} />
+              <DeckCardItemOptions card={card} onDeleteCard={onDeleteCard} />
             </GridItem>
           ))}
         </Grid>
