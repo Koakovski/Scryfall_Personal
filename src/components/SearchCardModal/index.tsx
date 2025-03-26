@@ -37,7 +37,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close, onSelectCard }) => {
   }, [query]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className="fixed inset-0 flex items-center justify-center z-1000">
       <div
         className="absolute inset-0 bg-black opacity-50 cursor-pointer"
         onClick={close}
