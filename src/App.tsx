@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Grid from "./components/Grid";
 import GridItem from "./components/GridItem";
-import CardItem from "./components/Card";
+import CardItem from "./components/CardItem";
 import { CardEntity } from "./domain/entities/card.entity";
 import AddCardButton from "./components/AddCardButton";
 import SearchCardModal from "./components/SearchCardModal";
+import { searchCardsService } from "./services/scryfall-api/services/cards/serch-cards.service";
 
 const App = () => {
   const [cards, setCards] = useState<CardEntity[]>([]);
@@ -13,6 +14,15 @@ const App = () => {
   function onSelectCard(card: CardEntity) {
     setCards((prev) => [card, ...prev]);
   }
+
+  useEffect(() => {
+    (async () => {
+      const result = await searchCardsService({ text: "signet" });
+      if (result.success) {
+        setCards(result.data.data.map((card) => CardEntity.new(card)));
+      }
+    })();
+  }, []);
 
   return (
     <>

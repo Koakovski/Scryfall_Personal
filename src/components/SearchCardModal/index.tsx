@@ -3,7 +3,7 @@ import { CardEntity } from "../../domain/entities/card.entity";
 import { searchCardsService } from "../../services/scryfall-api/services/cards/serch-cards.service";
 import Grid from "../Grid";
 import GridItem from "../GridItem";
-import CardItem from "../Card";
+import CardItem from "../CardItem";
 import Loader from "../Loader";
 
 type SearchCardModalProps = {
