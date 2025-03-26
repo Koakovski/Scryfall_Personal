@@ -11,6 +11,10 @@ export class CardEntity {
     return this.card.id;
   }
 
+  get oracleId() {
+    return this.card.oracle_id;
+  }
+
   get name() {
     return this.card.name;
   }
