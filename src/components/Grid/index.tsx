@@ -1,10 +1,18 @@
 import { FC, PropsWithChildren } from "react";
 
-const Grid: FC<PropsWithChildren> = ({ children }) => {
+type GridProps = PropsWithChildren<{
+  gridCols: "4" | "6" | "8";
+}>;
+
+const colClasses = {
+  "4": "grid-cols-4",
+  "6": "grid-cols-6",
+  "8": "grid-cols-8",
+};
+
+const Grid: FC<GridProps> = ({ children, gridCols }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-      {children}
-    </div>
+    <div className={`grid ${colClasses[gridCols]} gap-2 p-4`}>{children}</div>
   );
 };
 

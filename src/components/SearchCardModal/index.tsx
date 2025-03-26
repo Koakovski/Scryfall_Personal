@@ -11,7 +11,6 @@ type SearchCardModalProps = {
 
 const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
   const [query, setQuery] = useState("");
-
   const [cards, setCards] = useState<CardEntity[]>([]);
 
   const fetchData = async (text: string) => {
@@ -34,7 +33,10 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black opacity-50"></div>
+      <div
+        className="absolute inset-0 bg-black opacity-50 cursor-pointer"
+        onClick={close}
+      />
       <div className="relative w-9/10 h-9/10 bg-white p-6 rounded-lg flex flex-col">
         <div className="flex-1">
           <input
@@ -45,7 +47,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
             className="w-full border-2 text-gray-500 border-gray-300 p-2 rounded-md focus:outline-none"
           />
 
-          <Grid>
+          <Grid gridCols="6">
             {cards.map((card) => (
               <GridItem key={card.id}>
                 <CardItem card={card} />

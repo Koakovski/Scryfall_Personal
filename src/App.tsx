@@ -21,7 +21,7 @@ const App = () => {
       )}
 
       <div className="mr-30 ml-30">
-        <Grid>
+        <Grid gridCols="4">
           <GridItem key={"add_card_button"}>
             <AddCardButton onClick={() => setIsOpen(true)} />
           </GridItem>
