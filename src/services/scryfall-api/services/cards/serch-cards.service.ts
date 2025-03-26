@@ -10,6 +10,8 @@ export const searchCardsService = async (params: SearchCardsServiceParams) => {
       params: {
         q: params.text,
         page: params.page ?? 1,
+        unique: params.unique ?? "cards",
+        order: params.order ?? "name",
       },
     }
   );
@@ -20,4 +22,21 @@ export const searchCardsService = async (params: SearchCardsServiceParams) => {
 export type SearchCardsServiceParams = {
   text: string;
   page?: number;
+  unique?: "cards" | "art" | "prints";
+  order?:
+    | "name"
+    | "set"
+    | "released"
+    | "rarity"
+    | "color"
+    | "usd"
+    | "tix"
+    | "eur"
+    | "cmc"
+    | "power"
+    | "toughness"
+    | "edhrec"
+    | "penny"
+    | "artist"
+    | "review";
 };
