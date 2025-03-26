@@ -4,6 +4,7 @@ import { searchCardsService } from "../../services/scryfall-api/services/cards/s
 import Grid from "../Grid";
 import GridItem from "../GridItem";
 import CardItem from "../Card";
+import Loader from "../Loader";
 
 type SearchCardModalProps = {
   close: () => void;
@@ -12,12 +13,15 @@ type SearchCardModalProps = {
 const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
   const [query, setQuery] = useState("");
   const [cards, setCards] = useState<CardEntity[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchData = async (text: string) => {
+    setLoading(true);
     const result = await searchCardsService({ text });
     if (result.success) {
       setCards(result.data.data.map((card) => CardEntity.new(card)));
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -47,13 +51,20 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
         />
 
         <div className="flex-1 mt-2 rounded-lg bg-gray-100 overflow-auto">
-          <Grid gridCols="6">
-            {cards.map((card) => (
-              <GridItem key={card.id}>
-                <CardItem card={card} />
-              </GridItem>
-            ))}
-          </Grid>
+          {loading && (
+            <div className="flex items-center justify-center h-full">
+              <Loader />
+            </div>
+          )}
+          {!loading && cards.length > 0 && (
+            <Grid gridCols="6">
+              {cards.map((card) => (
+                <GridItem key={card.id}>
+                  <CardItem card={card} />
+                </GridItem>
+              ))}
+            </Grid>
+          )}
         </div>
 
         <div className="mt-2 flex justify-end">
