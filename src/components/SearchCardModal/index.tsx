@@ -38,15 +38,15 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
         onClick={close}
       />
       <div className="relative w-9/10 h-9/10 bg-white p-6 rounded-lg flex flex-col">
-        <div className="flex-1">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Pesquisar..."
-            className="w-full border-2 text-gray-500 border-gray-300 p-2 rounded-md focus:outline-none"
-          />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Pesquisar..."
+          className="w-full border-2 text-gray-500 border-gray-300 p-2 rounded-md focus:outline-none"
+        />
 
+        <div className="flex-1 mt-2 rounded-lg bg-gray-100 overflow-auto">
           <Grid gridCols="6">
             {cards.map((card) => (
               <GridItem key={card.id}>
@@ -56,7 +56,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
           </Grid>
         </div>
 
-        <div className="mt-4 flex justify-end">
+        <div className="mt-2 flex justify-end">
           <button
             onClick={close}
             className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
