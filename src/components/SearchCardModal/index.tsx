@@ -8,9 +8,10 @@ import Loader from "../Loader";
 
 type SearchCardModalProps = {
   close: () => void;
+  onSelectCard: (card: CardEntity) => void;
 };
 
-const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
+const SearchCardModal: FC<SearchCardModalProps> = ({ close, onSelectCard }) => {
   const [query, setQuery] = useState("");
   const [cards, setCards] = useState<CardEntity[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,9 +60,16 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
           {!loading && cards.length > 0 && (
             <Grid gridCols="6">
               {cards.map((card) => (
-                <GridItem key={card.id}>
-                  <CardItem card={card} />
-                </GridItem>
+                <div
+                  onClick={() => {
+                    onSelectCard(card);
+                    close();
+                  }}
+                >
+                  <GridItem key={card.id}>
+                    <CardItem card={card} />
+                  </GridItem>
+                </div>
               ))}
             </Grid>
           )}

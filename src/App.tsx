@@ -10,6 +10,10 @@ const App = () => {
   const [cards, setCards] = useState<CardEntity[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
+  function onSelectCard(card: CardEntity) {
+    setCards((prev) => [card, ...prev]);
+  }
+
   return (
     <>
       {isOpen && (
@@ -17,6 +21,7 @@ const App = () => {
           close={() => {
             setIsOpen(false);
           }}
+          onSelectCard={onSelectCard}
         />
       )}
 
