@@ -11,7 +11,6 @@ type SearchCardModalProps = {
 
 const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
   const [query, setQuery] = useState("");
-  const [typingTimeout, setTypingTimeout] = useState<number | null>(null);
 
   const [cards, setCards] = useState<CardEntity[]>([]);
 
@@ -23,21 +22,14 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
   };
 
   useEffect(() => {
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-    }
-
-    const timeout = setTimeout(() => {
+    const timeOutId = setTimeout(() => {
       if (query.trim()) {
         fetchData(query.trim());
       } else {
         setCards([]);
       }
     }, 300);
-
-    setTypingTimeout(timeout);
-
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(timeOutId);
   }, [query]);
 
   return (
@@ -50,7 +42,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close }) => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Pesquisar..."
-            className="w-full border-2 border-gray-300 p-2 rounded-md focus:outline-none"
+            className="w-full border-2 text-gray-500 border-gray-300 p-2 rounded-md focus:outline-none"
           />
 
           <Grid>
