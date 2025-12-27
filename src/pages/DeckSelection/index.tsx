@@ -139,7 +139,7 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck }) => {
                 </h3>
                 <div className="flex items-center gap-4 text-sm text-slate-400">
                   <span className="flex items-center gap-1">
-                    <span>📇</span> {deck.cardCount} cartas
+                    <span>📇</span> {deck.totalCardCount} cartas ({deck.uniqueCardCount} únicas)
                   </span>
                 </div>
                 <div className="mt-4 pt-4 border-t border-slate-700">

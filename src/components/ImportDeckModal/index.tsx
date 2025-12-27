@@ -1,5 +1,6 @@
 import { FC, useState } from "react";
 import { CardEntity } from "../../domain/entities/card.entity";
+import { DeckCardEntity } from "../../domain/entities/deck-card.entity";
 import { DeckEntity } from "../../domain/entities/deck.entity";
 import { getCardByNameService } from "../../services/scryfall-api/services/cards/get-card-by-name.service";
 import Loader from "../Loader";
@@ -13,7 +14,7 @@ type ImportProgress = {
   total: number;
   current: number;
   currentCard: string;
-  foundCards: CardEntity[];
+  foundCards: DeckCardEntity[];
   notFoundCards: string[];
 };
 
@@ -77,7 +78,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
       notFoundCards: [],
     });
 
-    const foundCards: CardEntity[] = [];
+    const foundCards: DeckCardEntity[] = [];
     const notFoundCards: string[] = [];
     let processedCount = 0;
 
@@ -92,16 +93,15 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
 
       if (result.success) {
         const cardEntity = CardEntity.new(result.data);
-        // Adiciona a quantidade solicitada
-        for (let i = 0; i < quantity; i++) {
-          foundCards.push(cardEntity);
-          processedCount++;
-          setProgress((prev) => ({
-            ...prev!,
-            current: processedCount,
-            foundCards: [...foundCards],
-          }));
-        }
+        // Cria uma DeckCardEntity com a quantidade correta
+        const deckCard = DeckCardEntity.new(cardEntity, quantity);
+        foundCards.push(deckCard);
+        processedCount += quantity;
+        setProgress((prev) => ({
+          ...prev!,
+          current: processedCount,
+          foundCards: [...foundCards],
+        }));
       } else {
         notFoundCards.push(`${quantity > 1 ? `${quantity}x ` : ""}${name}`);
         processedCount += quantity;
@@ -235,8 +235,8 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                     <span>✓</span> Encontradas ({progress?.foundCards.length || 0})
                   </h4>
                   <div className="max-h-32 overflow-auto text-sm text-slate-300 space-y-1">
-                    {[...new Set(progress?.foundCards.map((c) => c.name))].map((name, i) => (
-                      <p key={i}>{name}</p>
+                    {progress?.foundCards.map((c, i) => (
+                      <p key={i}>{c.quantity}x {c.cardName}</p>
                     ))}
                   </div>
                 </div>
@@ -266,7 +266,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                   </h3>
                   <p className="text-slate-300 mt-1">
                     O deck "<span className="text-white font-medium">{finalDeck.name}</span>" foi criado com{" "}
-                    <span className="text-green-400 font-medium">{finalDeck.cardCount} cartas</span>.
+                    <span className="text-green-400 font-medium">{finalDeck.totalCardCount} cartas</span> ({finalDeck.uniqueCardCount} únicas).
                   </p>
                 </div>
               ) : (
@@ -288,8 +288,8 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                     <span>✓</span> Encontradas ({progress?.foundCards.length || 0})
                   </h4>
                   <div className="max-h-48 overflow-auto text-sm text-slate-300 space-y-1">
-                    {[...new Set(progress?.foundCards.map((c) => c.name))].map((name, i) => (
-                      <p key={i}>{name}</p>
+                    {progress?.foundCards.map((c, i) => (
+                      <p key={i}>{c.quantity}x {c.cardName}</p>
                     ))}
                     {(progress?.foundCards.length || 0) === 0 && (
                       <p className="text-slate-500 italic">Nenhuma carta encontrada</p>
