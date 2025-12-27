@@ -11,8 +11,18 @@ const colClasses = {
 };
 
 const Grid: FC<GridProps> = ({ children, gridCols }) => {
+  const pxByColsMap = {
+    "4": "20",
+    "6": "10",
+    "8": "5",
+  };
+
   return (
-    <div className={`grid ${colClasses[gridCols]} gap-2 px-20`}>{children}</div>
+    <div
+      className={`grid ${colClasses[gridCols]} gap-2 px-${pxByColsMap[gridCols]}`}
+    >
+      {children}
+    </div>
   );
 };
 
