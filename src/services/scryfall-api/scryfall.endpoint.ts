@@ -6,4 +6,8 @@ export class ScryfallEndPoint {
   static namedCard() {
     return "/cards/named";
   }
+
+  static sets() {
+    return "/sets";
+  }
 }

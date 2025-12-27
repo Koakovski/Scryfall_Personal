@@ -1,10 +1,12 @@
 import { CardEntity } from "./card.entity";
 import { DeckCardData, DeckCardEntity } from "./deck-card.entity";
+import { PreferredSetData, PreferredSetEntity } from "./preferred-set.entity";
 
 export interface DeckData {
   id: string;
   name: string;
   cards: DeckCardData[];
+  preferredSet?: PreferredSetData;
   createdAt: string;
   updatedAt: string;
 }
@@ -12,12 +14,17 @@ export interface DeckData {
 export class DeckEntity {
   private constructor(private readonly data: DeckData) {}
 
-  static new(name: string, cards: DeckCardEntity[] = []): DeckEntity {
+  static new(
+    name: string,
+    cards: DeckCardEntity[] = [],
+    preferredSet?: PreferredSetEntity
+  ): DeckEntity {
     const now = new Date().toISOString();
     return new DeckEntity({
       id: crypto.randomUUID(),
       name,
       cards: cards.map((card) => card.toData()),
+      preferredSet: preferredSet?.toData(),
       createdAt: now,
       updatedAt: now,
     });
@@ -37,6 +44,12 @@ export class DeckEntity {
 
   get cards(): DeckCardEntity[] {
     return this.data.cards.map((card) => DeckCardEntity.fromData(card));
+  }
+
+  get preferredSet(): PreferredSetEntity | undefined {
+    return this.data.preferredSet
+      ? PreferredSetEntity.fromData(this.data.preferredSet)
+      : undefined;
   }
 
   /**
@@ -153,6 +166,15 @@ export class DeckEntity {
 
   updateName(name: string): this {
     this.data.name = name;
+    this.data.updatedAt = new Date().toISOString();
+    return this;
+  }
+
+  /**
+   * Define ou remove a coleção preferencial do deck
+   */
+  updatePreferredSet(preferredSet?: PreferredSetEntity): this {
+    this.data.preferredSet = preferredSet?.toData();
     this.data.updatedAt = new Date().toISOString();
     return this;
   }

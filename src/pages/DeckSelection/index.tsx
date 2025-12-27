@@ -1,7 +1,9 @@
 import { FC, useEffect, useState } from "react";
 import { DeckEntity } from "../../domain/entities/deck.entity";
+import { PreferredSetEntity } from "../../domain/entities/preferred-set.entity";
 import { deckStorageService } from "../../services/local-storage";
 import ImportDeckModal from "../../components/ImportDeckModal";
+import SetAutocomplete from "../../components/SetAutocomplete";
 
 type DeckSelectionProps = {
   onSelectDeck: (deck: DeckEntity) => void;
@@ -12,6 +14,7 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
   const [decks, setDecks] = useState<DeckEntity[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newDeckName, setNewDeckName] = useState("");
+  const [preferredSet, setPreferredSet] = useState<{ code: string; name: string } | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
@@ -26,11 +29,22 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
   const handleCreateDeck = () => {
     if (!newDeckName.trim()) return;
 
-    const newDeck = DeckEntity.new(newDeckName.trim());
+    const preferredSetEntity = preferredSet
+      ? PreferredSetEntity.new(preferredSet.code, preferredSet.name)
+      : undefined;
+
+    const newDeck = DeckEntity.new(newDeckName.trim(), [], preferredSetEntity);
     deckStorageService.saveDeck(newDeck);
     setNewDeckName("");
+    setPreferredSet(null);
     setIsCreating(false);
     loadDecks();
+  };
+
+  const handleCancelCreate = () => {
+    setIsCreating(false);
+    setNewDeckName("");
+    setPreferredSet(null);
   };
 
   const handleDeleteDeck = (deckId: string, e: React.MouseEvent) => {
@@ -62,31 +76,54 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
           {isCreating ? (
             <div className="bg-slate-800/50 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 shadow-xl">
               <h3 className="text-lg font-semibold text-white mb-4">Criar Novo Deck</h3>
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  value={newDeckName}
-                  onChange={(e) => setNewDeckName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCreateDeck()}
-                  placeholder="Nome do deck..."
-                  className="flex-1 px-4 py-3 bg-slate-900/80 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50"
-                  autoFocus
-                />
-                <button
-                  onClick={handleCreateDeck}
-                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-lg hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-900/30 cursor-pointer"
-                >
-                  Criar
-                </button>
-                <button
-                  onClick={() => {
-                    setIsCreating(false);
-                    setNewDeckName("");
-                  }}
-                  className="px-6 py-3 bg-slate-700 text-slate-300 font-semibold rounded-lg hover:bg-slate-600 transition-all cursor-pointer"
-                >
-                  Cancelar
-                </button>
+              <div className="space-y-4">
+                {/* Nome do deck */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Nome do Deck *
+                  </label>
+                  <input
+                    type="text"
+                    value={newDeckName}
+                    onChange={(e) => setNewDeckName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleCreateDeck()}
+                    placeholder="Ex: Mono Red Aggro"
+                    className="w-full px-4 py-3 bg-slate-900/80 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50"
+                    autoFocus
+                  />
+                </div>
+
+                {/* Coleção preferencial (opcional) */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Coleção Preferencial{" "}
+                    <span className="text-slate-500">(opcional)</span>
+                  </label>
+                  <p className="text-xs text-slate-500 mb-2">
+                    Novas cartas adicionadas usarão esta coleção quando disponível.
+                  </p>
+                  <SetAutocomplete
+                    value={preferredSet}
+                    onChange={setPreferredSet}
+                    placeholder="Buscar coleção pelo nome..."
+                  />
+                </div>
+
+                {/* Botões */}
+                <div className="flex gap-4 pt-2">
+                  <button
+                    onClick={handleCreateDeck}
+                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-lg hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-900/30 cursor-pointer"
+                  >
+                    Criar Deck
+                  </button>
+                  <button
+                    onClick={handleCancelCreate}
+                    className="px-6 py-3 bg-slate-700 text-slate-300 font-semibold rounded-lg hover:bg-slate-600 transition-all cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
@@ -139,10 +176,15 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
                 <h3 className="text-xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">
                   {deck.name}
                 </h3>
-                <div className="flex items-center gap-4 text-sm text-slate-400">
+                <div className="flex flex-col gap-1 text-sm text-slate-400">
                   <span className="flex items-center gap-1">
                     <span>📇</span> {deck.totalCardCount} cartas ({deck.uniqueCardCount} únicas)
                   </span>
+                  {deck.preferredSet && (
+                    <span className="flex items-center gap-1 text-purple-400">
+                      <span>📦</span> {deck.preferredSet.name} ({deck.preferredSet.code.toUpperCase()})
+                    </span>
+                  )}
                 </div>
                 <div className="mt-4 pt-4 border-t border-slate-700">
                   <p className="text-xs text-slate-500">
@@ -172,4 +214,3 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
 };
 
 export default DeckSelection;
-
