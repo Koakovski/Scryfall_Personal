@@ -11,6 +11,7 @@ import SetAutocomplete from "../../components/SetAutocomplete";
 import { DeckEntity } from "../../domain/entities/deck.entity";
 import { deckStorageService } from "../../services/local-storage";
 import { downloadDeckAsZip } from "../../services/deck-download";
+import { downloadDeckAsPdf, PDF_FORMATS, PdfFormat } from "../../services/deck-download-pdf";
 
 type DeckEditorProps = {
   deck: DeckEntity;
@@ -30,7 +31,14 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       : null
   );
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [showPdfFormatDropdown, setShowPdfFormatDropdown] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<{
+    current: number;
+    total: number;
+    currentCard: string;
+  } | null>(null);
+  const [downloadPdfProgress, setDownloadPdfProgress] = useState<{
     current: number;
     total: number;
     currentCard: string;
@@ -166,6 +174,32 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     }
   };
 
+  const handleDownloadPdf = async (format: PdfFormat) => {
+    if (cards.length === 0) return;
+    
+    setShowPdfFormatDropdown(false);
+    setIsDownloadingPdf(true);
+    setDownloadPdfProgress(null);
+    
+    try {
+      // Recria o deck atual para garantir que temos os dados mais recentes
+      const currentDeck = DeckEntity.fromData({
+        ...deck.toData(),
+        cards: cards.map((c) => c.toData()),
+      });
+      
+      await downloadDeckAsPdf(currentDeck, format, (progress) => {
+        setDownloadPdfProgress(progress);
+      });
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      alert("Erro ao gerar o PDF. Tente novamente.");
+    } finally {
+      setIsDownloadingPdf(false);
+      setDownloadPdfProgress(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950">
       {isOpen && (
@@ -228,7 +262,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                     : "Definir Coleção"}
                 </button>
                 
-                {/* Botão de Download */}
+                {/* Botão de Download ZIP */}
                 <button
                   onClick={handleDownloadDeck}
                   disabled={isDownloading || cards.length === 0}
@@ -239,7 +273,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                       ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
                       : "bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30"
                   }`}
-                  title={cards.length === 0 ? "Adicione cartas para baixar" : "Baixar imagens do deck"}
+                  title={cards.length === 0 ? "Adicione cartas para baixar" : "Baixar imagens do deck em ZIP"}
                 >
                   {isDownloading ? (
                     <>
@@ -281,10 +315,114 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                           clipRule="evenodd"
                         />
                       </svg>
-                      Baixar Imagens
+                      ZIP
                     </>
                   )}
                 </button>
+
+                {/* Botão de Download PDF A4 com Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => !isDownloadingPdf && cards.length > 0 && setShowPdfFormatDropdown(!showPdfFormatDropdown)}
+                    disabled={isDownloadingPdf || cards.length === 0}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                      isDownloadingPdf
+                        ? "bg-amber-600/40 text-amber-300 border border-amber-500/40"
+                        : cards.length === 0
+                        ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                        : "bg-amber-600/20 text-amber-300 border border-amber-500/40 hover:bg-amber-600/30"
+                    }`}
+                    title={cards.length === 0 ? "Adicione cartas para baixar" : "Baixar PDF para impressão A4"}
+                  >
+                    {isDownloadingPdf ? (
+                      <>
+                        <svg
+                          className="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        {downloadPdfProgress
+                          ? `${downloadPdfProgress.current}/${downloadPdfProgress.total}`
+                          : "Gerando PDF..."}
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        PDF A4
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className={`h-4 w-4 transition-transform ${showPdfFormatDropdown ? "rotate-180" : ""}`}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Dropdown de formatos */}
+                  {showPdfFormatDropdown && (
+                    <>
+                      {/* Overlay para fechar o dropdown ao clicar fora */}
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setShowPdfFormatDropdown(false)}
+                      />
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-slate-800 border border-slate-600 rounded-lg shadow-xl z-20 overflow-hidden">
+                        <div className="p-2 border-b border-slate-700">
+                          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                            Escolha o formato
+                          </span>
+                        </div>
+                        {PDF_FORMATS.map((format) => (
+                          <button
+                            key={format.id}
+                            onClick={() => handleDownloadPdf(format.id)}
+                            className="w-full px-4 py-3 text-left hover:bg-slate-700 transition-colors flex flex-col gap-0.5 cursor-pointer"
+                          >
+                            <span className="text-sm font-medium text-white">
+                              {format.label}
+                            </span>
+                            <span className="text-xs text-slate-400">
+                              {format.description}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
               </>
             )}
           </div>
