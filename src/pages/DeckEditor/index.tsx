@@ -307,6 +307,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                 onDecreaseQuantity={() => onDecreaseQuantity(index)}
                 onChangeCard={(newCard) => onChangeCard(index, newCard)}
                 onChangeToken={(tokenIndex, newToken) => onChangeToken(index, tokenIndex, newToken)}
+                preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
               />
             </GridItem>
           ))}

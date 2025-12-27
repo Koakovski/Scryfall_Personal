@@ -7,12 +7,14 @@ type DeckCardItemOptionsProps = {
   card: CardEntity;
   onDeleteCard: () => void;
   onChangeCard: (newCard: CardEntity) => void;
+  preferredSet?: { code: string; name: string } | null;
 };
 
 const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
   card,
   onDeleteCard,
   onChangeCard,
+  preferredSet,
 }) => {
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -34,6 +36,7 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
           card={card}
           close={() => setIsVersionModalOpen(false)}
           onChangeCard={(_, newCard) => onChangeCard(newCard)}
+          preferredSet={preferredSet}
         />
       )}
 

@@ -11,6 +11,7 @@ type DeckCardItemProps = {
   onDecreaseQuantity: () => void;
   onChangeCard: (newCard: CardEntity) => void;
   onChangeToken?: (tokenIndex: number, newToken: CardEntity) => void;
+  preferredSet?: { code: string; name: string } | null;
 };
 
 const DeckCardItem: FC<DeckCardItemProps> = ({
@@ -21,6 +22,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
   onDecreaseQuantity,
   onChangeCard,
   onChangeToken,
+  preferredSet,
 }) => {
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
   const [isTokensListOpen, setIsTokensListOpen] = useState(false);
@@ -49,6 +51,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
           card={card}
           close={() => setIsVersionModalOpen(false)}
           onChangeCard={(_, newCard) => onChangeCard(newCard)}
+          preferredSet={preferredSet}
         />
       )}
 
@@ -60,6 +63,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
             onChangeToken(tokenToChange.index, newToken);
             setTokenToChange(null);
           }}
+          preferredSet={preferredSet}
         />
       )}
 
