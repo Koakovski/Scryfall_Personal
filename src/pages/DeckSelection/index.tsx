@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import { DeckEntity } from "../../domain/entities/deck.entity";
 import { deckStorageService } from "../../services/local-storage";
+import ImportDeckModal from "../../components/ImportDeckModal";
 
 type DeckSelectionProps = {
   onSelectDeck: (deck: DeckEntity) => void;
@@ -10,6 +11,7 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck }) => {
   const [decks, setDecks] = useState<DeckEntity[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newDeckName, setNewDeckName] = useState("");
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
     loadDecks();
@@ -36,6 +38,12 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck }) => {
       deckStorageService.deleteDeck(deckId);
       loadDecks();
     }
+  };
+
+  const handleDeckImported = (deck: DeckEntity) => {
+    deckStorageService.saveDeck(deck);
+    setIsImportModalOpen(false);
+    loadDecks();
   };
 
   return (
@@ -80,13 +88,22 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck }) => {
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => setIsCreating(true)}
-              className="w-full py-6 border-2 border-dashed border-slate-600 rounded-xl text-slate-400 hover:border-amber-500/50 hover:text-amber-400 hover:bg-amber-500/5 transition-all flex items-center justify-center gap-3 cursor-pointer group"
-            >
-              <span className="text-3xl group-hover:scale-110 transition-transform">+</span>
-              <span className="text-lg font-medium">Criar Novo Deck</span>
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setIsCreating(true)}
+                className="flex-1 py-6 border-2 border-dashed border-slate-600 rounded-xl text-slate-400 hover:border-amber-500/50 hover:text-amber-400 hover:bg-amber-500/5 transition-all flex items-center justify-center gap-3 cursor-pointer group"
+              >
+                <span className="text-3xl group-hover:scale-110 transition-transform">+</span>
+                <span className="text-lg font-medium">Criar Novo Deck</span>
+              </button>
+              <button
+                onClick={() => setIsImportModalOpen(true)}
+                className="flex-1 py-6 border-2 border-dashed border-slate-600 rounded-xl text-slate-400 hover:border-purple-500/50 hover:text-purple-400 hover:bg-purple-500/5 transition-all flex items-center justify-center gap-3 cursor-pointer group"
+              >
+                <span className="text-3xl group-hover:scale-110 transition-transform">📋</span>
+                <span className="text-lg font-medium">Importar por Lista</span>
+              </button>
+            </div>
           )}
         </div>
 
@@ -138,6 +155,14 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck }) => {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Import Modal */}
+        {isImportModalOpen && (
+          <ImportDeckModal
+            close={() => setIsImportModalOpen(false)}
+            onDeckImported={handleDeckImported}
+          />
         )}
       </div>
     </div>
