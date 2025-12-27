@@ -93,23 +93,23 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-1000">
+    <div className="fixed inset-0 flex items-center justify-center z-[1000]">
       <div
-        className="absolute inset-0 bg-black opacity-50 cursor-pointer"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer"
         onClick={close}
       />
-      <div className="relative w-9/10 h-9/10 bg-white p-6 rounded-lg flex flex-col">
+      <div className="relative w-[90%] h-[90%] max-w-6xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl flex flex-col">
         {/* Header com info da coleção preferencial */}
         <div className="mb-4">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Pesquisar..."
-            className="w-full border-2 text-gray-500 border-gray-300 p-2 rounded-md focus:outline-none"
+            placeholder="Pesquisar carta..."
+            className="w-full px-4 py-3 bg-slate-900/80 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50"
           />
           {preferredSet && (
-            <p className="text-sm text-purple-600 mt-2 flex items-center gap-1">
+            <p className="text-sm text-purple-400 mt-2 flex items-center gap-1">
               <span>📦</span>
               Coleção preferencial:{" "}
               <span className="font-semibold">
@@ -119,7 +119,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
           )}
         </div>
 
-        <div className="flex-1 rounded-lg bg-gray-100 overflow-auto">
+        <div className="flex-1 rounded-xl bg-slate-950/50 border border-slate-700/50 overflow-auto p-4">
           {loading && (
             <div className="flex items-center justify-center h-full">
               <Loader />
@@ -131,7 +131,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
                 <div
                   key={cardWithData.entity.id}
                   onClick={() => handleSelectCard(cardWithData)}
-                  className={`cursor-pointer ${isSelecting ? "opacity-50 pointer-events-none" : ""}`}
+                  className={`cursor-pointer hover:scale-105 transition-transform ${isSelecting ? "opacity-50 pointer-events-none" : ""}`}
                 >
                   <GridItem key={cardWithData.entity.id}>
                     <CardItem card={cardWithData.entity} />
@@ -142,19 +142,19 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
           )}
           {!loading && !query.trim() && cards.length === 0 && (
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">Busque por um card</p>
+              <p className="text-slate-500">Busque por uma carta</p>
             </div>
           )}
           {!loading && query.trim().length > 0 && cards.length === 0 && (
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">Nenhum resultado encontrado</p>
+              <p className="text-slate-500">Nenhum resultado encontrado</p>
             </div>
           )}
         </div>
-        <div className="mt-2 flex justify-end">
+        <div className="mt-4 flex justify-end">
           <button
             onClick={close}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            className="px-5 py-2.5 bg-slate-700 text-slate-300 font-medium rounded-lg hover:bg-slate-600 transition-all cursor-pointer"
           >
             Fechar
           </button>

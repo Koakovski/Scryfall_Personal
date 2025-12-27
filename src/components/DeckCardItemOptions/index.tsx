@@ -74,13 +74,13 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
 
           <button
             onClick={handleChangeVersion}
-            className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-lg 
-                       hover:bg-blue-600 hover:scale-105 transform transition-all duration-150
-                       flex items-center gap-2 min-w-[140px] justify-center"
+            className="px-4 py-2 bg-slate-700/90 text-slate-200 font-medium rounded-lg shadow-lg 
+                       hover:bg-slate-600 hover:scale-105 transform transition-all duration-150
+                       flex items-center gap-2 min-w-[140px] justify-center border border-slate-600"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
+              className="h-4 w-4"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
