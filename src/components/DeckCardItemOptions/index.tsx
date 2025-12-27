@@ -5,7 +5,7 @@ import ChangeCardVariationModal from "../ChangeCardVariationModal";
 
 type DeckCardItemOptionsProps = {
   card: CardEntity;
-  onDeleteCard: (card: CardEntity) => void;
+  onDeleteCard: () => void;
   onChangeCard: (oldCard: CardEntity, newCard: CardEntity) => void;
 };
 
@@ -23,7 +23,7 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onDeleteCard(card);
+    onDeleteCard();
   };
 
   const handleChangeVersion = (e: React.MouseEvent) => {

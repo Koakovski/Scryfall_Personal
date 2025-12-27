@@ -38,8 +38,8 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     saveDeck(newCards);
   }
 
-  const onDeleteCard = (card: CardEntity) => {
-    const newCards = cards.filter((currCard) => currCard.id !== card.id);
+  const onDeleteCard = (index: number) => {
+    const newCards = cards.filter((_, i) => i !== index);
     setCards(newCards);
     saveDeck(newCards);
   };
@@ -82,11 +82,11 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
           <GridItem key={"add_card_button"}>
             <AddCardButton onClick={() => setIsOpen(true)} />
           </GridItem>
-          {cards.map((card) => (
-            <GridItem key={card.id}>
+          {cards.map((card, index) => (
+            <GridItem key={`${card.id}-${index}`}>
               <DeckCardItemOptions
                 card={card}
-                onDeleteCard={onDeleteCard}
+                onDeleteCard={() => onDeleteCard(index)}
                 onChangeCard={onChangeCard}
               />
             </GridItem>
