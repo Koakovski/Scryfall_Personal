@@ -2,8 +2,11 @@ import { FC, useState } from "react";
 import { CardEntity } from "../../domain/entities/card.entity";
 import { DeckCardEntity } from "../../domain/entities/deck-card.entity";
 import { DeckEntity } from "../../domain/entities/deck.entity";
+import { PreferredSetEntity } from "../../domain/entities/preferred-set.entity";
 import { getCardByNameService } from "../../services/scryfall-api/services/cards/get-card-by-name.service";
+import { getCardByNameAndSetService } from "../../services/scryfall-api/services/cards/get-card-by-name-and-set.service";
 import Loader from "../Loader";
+import SetAutocomplete from "../SetAutocomplete";
 
 type ImportDeckModalProps = {
   close: () => void;
@@ -23,6 +26,7 @@ type ImportState = "idle" | "importing" | "finished";
 const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) => {
   const [deckName, setDeckName] = useState("");
   const [cardList, setCardList] = useState("");
+  const [preferredSet, setPreferredSet] = useState<{ code: string; name: string } | null>(null);
   const [importState, setImportState] = useState<ImportState>("idle");
   const [progress, setProgress] = useState<ImportProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +96,21 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
       const result = await getCardByNameService(name);
 
       if (result.success) {
-        const cardEntity = CardEntity.new(result.data);
+        let cardEntity = CardEntity.new(result.data);
+
+        // Se tiver coleção preferencial, tenta buscar a versão dessa coleção
+        if (preferredSet) {
+          const preferredResult = await getCardByNameAndSetService(
+            cardEntity.name,
+            preferredSet.code
+          );
+          if (preferredResult.success) {
+            cardEntity = CardEntity.new(preferredResult.data);
+          }
+          // Delay adicional para a segunda requisição
+          await delay(100);
+        }
+
         // Cria uma DeckCardEntity com a quantidade correta
         const deckCard = DeckCardEntity.new(cardEntity, quantity);
         foundCards.push(deckCard);
@@ -122,7 +140,10 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
     }));
 
     if (foundCards.length > 0) {
-      const deck = DeckEntity.new(deckName.trim(), foundCards);
+      const preferredSetEntity = preferredSet
+        ? PreferredSetEntity.new(preferredSet.code, preferredSet.name)
+        : undefined;
+      const deck = DeckEntity.new(deckName.trim(), foundCards, preferredSetEntity);
       setFinalDeck(deck);
     }
 
@@ -139,6 +160,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
     setImportState("idle");
     setProgress(null);
     setFinalDeck(null);
+    setPreferredSet(null);
   };
 
   const progressPercentage = progress
@@ -178,6 +200,22 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                 />
               </div>
 
+              {/* Preferred Set */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Coleção Preferencial{" "}
+                  <span className="text-slate-500">(opcional)</span>
+                </label>
+                <p className="text-xs text-slate-500 mb-2">
+                  Cartas importadas usarão esta coleção quando disponível.
+                </p>
+                <SetAutocomplete
+                  value={preferredSet}
+                  onChange={setPreferredSet}
+                  placeholder="Buscar coleção pelo nome..."
+                />
+              </div>
+
               {/* Card List */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -190,7 +228,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
 4 Monastery Swiftspear
 4 Goblin Guide
 20 Mountain`}
-                  rows={12}
+                  rows={10}
                   className="w-full px-4 py-3 bg-slate-900/80 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 font-mono text-sm resize-none"
                 />
               </div>
@@ -268,6 +306,11 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                     O deck "<span className="text-white font-medium">{finalDeck.name}</span>" foi criado com{" "}
                     <span className="text-green-400 font-medium">{finalDeck.totalCardCount} cartas</span> ({finalDeck.uniqueCardCount} únicas).
                   </p>
+                  {finalDeck.preferredSet && (
+                    <p className="text-purple-400 text-sm mt-2 flex items-center gap-1">
+                      <span>📦</span> Coleção preferencial: {finalDeck.preferredSet.name} ({finalDeck.preferredSet.code.toUpperCase()})
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">

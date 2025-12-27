@@ -80,7 +80,7 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
                 {/* Nome do deck */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Nome do Deck *
+                    Nome do Deck
                   </label>
                   <input
                     type="text"
