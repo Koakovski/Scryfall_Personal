@@ -71,7 +71,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
         <CardItem card={card} isFlipped={isFlipped} onFlipChange={setIsFlipped} />
 
         {/* Badges no canto superior direito - sempre visíveis */}
-        <div className="absolute top-1 right-1 flex items-center gap-1 z-[5]">
+        <div className="absolute top-0.5 right-0.5 flex items-center gap-0.5 z-[5]">
           {/* Indicador de carta double-faced */}
           {card.isDoubleFaced && (
             <button
@@ -80,14 +80,14 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                 setIsFlipped(!isFlipped);
               }}
               className="bg-gradient-to-br from-indigo-500 to-violet-600 
-                         text-white w-5 h-5 rounded-full 
+                         text-white w-4 h-4 rounded-full 
                          flex items-center justify-center shadow-md border border-white
                          hover:from-indigo-400 hover:to-violet-500 transition-all"
               title={isFlipped ? "Ver frente" : "Ver verso"}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3"
+                className="h-2.5 w-2.5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -103,7 +103,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
           {/* Badge de quantidade */}
           <div
             className="bg-gradient-to-br from-amber-500 to-orange-600 
-                       text-white font-bold text-xs w-5 h-5 rounded-full 
+                       text-white font-bold text-[10px] w-4 h-4 rounded-full 
                        flex items-center justify-center shadow-md border border-white"
           >
             {quantity}
@@ -112,32 +112,32 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
 
         {/* Badge de tokens - mostra quantidade de tokens */}
         {tokens.length > 0 && (
-          <div className="absolute top-1 left-1 z-[5]">
+          <div className="absolute top-0.5 left-0.5 z-[5]">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsTokensListOpen(!isTokensListOpen);
               }}
               className="bg-gradient-to-br from-purple-500 to-fuchsia-600 
-                         text-white font-bold text-xs px-1.5 py-0.5 rounded-full 
+                         text-white font-bold text-[10px] px-1 py-0.5 rounded-full 
                          flex items-center gap-0.5 shadow-md border border-white
                          hover:from-purple-400 hover:to-fuchsia-500 transition-all"
               title="Ver tokens"
             >
-              <span className="text-[10px]">🎭</span>
+              <span className="text-[8px]">🎭</span>
               <span>{tokens.length}</span>
             </button>
 
             {/* Lista flutuante de tokens */}
             {isTokensListOpen && (
               <div
-                className="absolute top-full left-0 mt-2 bg-slate-900/95 backdrop-blur-sm 
-                           border border-slate-600 rounded-xl shadow-2xl p-3 z-[6]
-                           min-w-[200px] max-w-[280px]"
+                className="absolute top-full left-0 mt-1.5 bg-slate-900/95 backdrop-blur-sm 
+                           border border-slate-600 rounded-lg shadow-2xl p-2 z-[6]
+                           min-w-[160px] max-w-[220px]"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-700">
-                  <h4 className="text-white font-semibold text-sm flex items-center gap-1">
+                <div className="flex items-center justify-between mb-1.5 pb-1.5 border-b border-slate-700">
+                  <h4 className="text-white font-semibold text-xs flex items-center gap-1">
                     <span>🎭</span> Tokens
                   </h4>
                   <button
@@ -145,28 +145,28 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                       e.stopPropagation();
                       setIsTokensListOpen(false);
                     }}
-                    className="text-slate-400 hover:text-white transition-colors text-lg leading-none"
+                    className="text-slate-400 hover:text-white transition-colors text-sm leading-none"
                   >
                     ×
                   </button>
                 </div>
-                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
+                <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
                   {tokens.map((token, index) => (
                     <div
                       key={`${token.id}-${index}`}
-                      className="flex items-center gap-2 p-2 bg-slate-800/80 rounded-lg 
+                      className="flex items-center gap-1.5 p-1.5 bg-slate-800/80 rounded-md 
                                  hover:bg-slate-700/80 transition-colors group/token"
                     >
                       <img
                         src={token.normalImageUri}
                         alt={token.name}
-                        className="w-12 h-auto rounded shadow-md"
+                        className="w-10 h-auto rounded shadow-md"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">
+                        <p className="text-white text-xs font-medium truncate">
                           {token.name}
                         </p>
-                        <p className="text-slate-400 text-xs truncate">
+                        <p className="text-slate-400 text-[10px] truncate">
                           {token.setName}
                         </p>
                       </div>
@@ -177,14 +177,14 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                             setTokenToChange({ token, index });
                             setIsTokensListOpen(false);
                           }}
-                          className="p-1.5 bg-purple-500/80 text-white rounded-md 
+                          className="p-1 bg-purple-500/80 text-white rounded 
                                      hover:bg-purple-500 transition-all opacity-0 
                                      group-hover/token:opacity-100"
                           title="Trocar versão do token"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
+                            className="h-3 w-3"
                             viewBox="0 0 20 20"
                             fill="currentColor"
                           >
@@ -212,16 +212,16 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
 
         {/* Botões no hover */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center gap-3 
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 
                      transition-opacity duration-200 opacity-0 pointer-events-none 
                      group-hover:opacity-100 group-hover:pointer-events-auto"
         >
           {/* Controles de quantidade */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Botão diminuir (ou remover se quantidade = 1) */}
             <button
               onClick={handleDecrease}
-              className="w-11 h-11 bg-red-500 text-white font-bold text-xl rounded-full 
+              className="w-8 h-8 bg-red-500 text-white font-bold text-base rounded-full 
                          shadow-lg hover:bg-red-600 hover:scale-110 transform transition-all 
                          duration-150 flex items-center justify-center"
               title={quantity <= 1 ? "Remover carta" : "Diminuir quantidade"}
@@ -231,8 +231,8 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
 
             {/* Display de quantidade central */}
             <div
-              className="bg-white/90 text-gray-900 font-bold text-xl px-3 py-1.5 
-                         rounded-lg shadow-lg min-w-[50px] text-center"
+              className="bg-white/90 text-gray-900 font-bold text-base px-2 py-1 
+                         rounded-md shadow-lg min-w-[36px] text-center"
             >
               {quantity}
             </div>
@@ -240,7 +240,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
             {/* Botão aumentar */}
             <button
               onClick={handleIncrease}
-              className="w-11 h-11 bg-green-500 text-white font-bold text-xl rounded-full 
+              className="w-8 h-8 bg-green-500 text-white font-bold text-base rounded-full 
                          shadow-lg hover:bg-green-600 hover:scale-110 transform transition-all 
                          duration-150 flex items-center justify-center"
               title="Aumentar quantidade"
@@ -250,7 +250,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
           </div>
 
           {/* Botões de ação */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* Botão flip para cartas double-faced */}
             {card.isDoubleFaced && (
               <button
@@ -258,14 +258,14 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                   e.stopPropagation();
                   setIsFlipped(!isFlipped);
                 }}
-                className="px-3 py-2 bg-indigo-600/90 text-white font-medium rounded-lg shadow-lg 
+                className="px-2 py-1.5 bg-indigo-600/90 text-white text-xs font-medium rounded-md shadow-lg 
                            hover:bg-indigo-500 hover:scale-105 transform transition-all duration-150
-                           flex items-center gap-1.5 justify-center border border-indigo-400/50"
+                           flex items-center gap-1 justify-center border border-indigo-400/50"
                 title={isFlipped ? "Ver frente" : "Ver verso"}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
+                  className="h-3 w-3"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -282,13 +282,13 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
             {/* Botão trocar versão */}
             <button
               onClick={handleChangeVersion}
-              className="px-3 py-2 bg-slate-700/90 text-slate-200 font-medium rounded-lg shadow-lg 
+              className="px-2 py-1.5 bg-slate-700/90 text-slate-200 text-xs font-medium rounded-md shadow-lg 
                          hover:bg-slate-600 hover:scale-105 transform transition-all duration-150
-                         flex items-center gap-1.5 justify-center border border-slate-600"
+                         flex items-center gap-1 justify-center border border-slate-600"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
+                className="h-3 w-3"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >

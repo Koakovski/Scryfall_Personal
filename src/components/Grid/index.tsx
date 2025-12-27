@@ -12,7 +12,7 @@ const colClasses = {
 
 const Grid: FC<GridProps> = ({ children, gridCols }) => {
   return (
-    <div className={`grid ${colClasses[gridCols]} gap-2 p-4`}>{children}</div>
+    <div className={`grid ${colClasses[gridCols]} gap-2 px-20`}>{children}</div>
   );
 };
 

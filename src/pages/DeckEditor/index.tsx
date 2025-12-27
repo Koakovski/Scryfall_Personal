@@ -236,10 +236,10 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
 
       {/* Deck Info Bar */}
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
           <div className="flex-shrink-0">
             {isEditingName ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <input
                   type="text"
                   value={editingName}
@@ -248,19 +248,19 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                     if (e.key === "Enter") saveDeckName();
                     if (e.key === "Escape") handleCancelNameEdit();
                   }}
-                  className="px-3 py-1.5 bg-slate-900/80 border border-amber-500/50 rounded-lg text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="px-2 py-1 bg-slate-900/80 border border-amber-500/50 rounded-md text-white text-base font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   autoFocus
                 />
                 <button
                   onClick={saveDeckName}
                   disabled={!editingName.trim()}
-                  className="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-2 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ✓
                 </button>
                 <button
                   onClick={handleCancelNameEdit}
-                  className="px-3 py-1.5 bg-slate-600 text-white text-sm font-medium rounded hover:bg-slate-500 transition-colors cursor-pointer"
+                  className="px-2 py-1 bg-slate-600 text-white text-xs font-medium rounded hover:bg-slate-500 transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
@@ -268,42 +268,42 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
             ) : (
               <div
                 onClick={() => setIsEditingName(true)}
-                className="group flex items-center gap-2 cursor-pointer"
+                className="group flex items-center gap-1.5 cursor-pointer"
                 title="Clique para editar o nome"
               >
-                <h2 className="text-xl font-bold text-white group-hover:text-amber-300 transition-colors">
+                <h2 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors">
                   {deck.name}
                 </h2>
-                <span className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity">
+                <span className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity text-sm">
                   ✏️
                 </span>
               </div>
             )}
-            <p className="text-sm text-slate-400">
+            <p className="text-xs text-slate-400">
               {cards.reduce((sum, c) => sum + c.quantity, 0)} cartas no deck (
               {cards.length} únicas)
             </p>
           </div>
 
           {/* Coleção preferencial e Download */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {isEditingSet ? (
-              <div className="flex items-center gap-2 bg-slate-900/80 p-3 rounded-lg border border-purple-500/30">
+              <div className="flex items-center gap-1.5 bg-slate-900/80 p-2 rounded-md border border-purple-500/30">
                 <SetAutocomplete
                   value={editingSet}
                   onChange={setEditingSet}
                   placeholder="Buscar coleção..."
-                  className="w-72"
+                  className="w-56"
                 />
                 <button
                   onClick={savePreferredSet}
-                  className="px-3 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-500 transition-colors cursor-pointer whitespace-nowrap"
+                  className="px-2 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-500 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   Salvar
                 </button>
                 <button
                   onClick={handleCancelEdit}
-                  className="px-3 py-2 bg-slate-600 text-white text-sm font-medium rounded hover:bg-slate-500 transition-colors cursor-pointer whitespace-nowrap"
+                  className="px-2 py-1.5 bg-slate-600 text-white text-xs font-medium rounded hover:bg-slate-500 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   Cancelar
                 </button>
@@ -312,7 +312,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
               <>
                 <button
                   onClick={() => setIsEditingSet(true)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                     deck.preferredSet
                       ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 hover:bg-purple-600/30"
                       : "bg-slate-700 text-slate-300 hover:bg-slate-600"
@@ -328,7 +328,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                 <button
                   onClick={handleDownloadDeck}
                   disabled={isDownloading || cards.length === 0}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                     isDownloading
                       ? "bg-emerald-600/40 text-emerald-300 border border-emerald-500/40"
                       : cards.length === 0
@@ -340,7 +340,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                   {isDownloading ? (
                     <>
                       <svg
-                        className="animate-spin h-4 w-4"
+                        className="animate-spin h-3 w-3"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -367,7 +367,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                     <>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
+                        className="h-3 w-3"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -387,7 +387,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                   <button
                     onClick={() => !isDownloadingPdf && cards.length > 0 && setShowPdfFormatDropdown(!showPdfFormatDropdown)}
                     disabled={isDownloadingPdf || cards.length === 0}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                       isDownloadingPdf
                         ? "bg-amber-600/40 text-amber-300 border border-amber-500/40"
                         : cards.length === 0
@@ -399,7 +399,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                     {isDownloadingPdf ? (
                       <>
                         <svg
-                          className="animate-spin h-4 w-4"
+                          className="animate-spin h-3 w-3"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -426,7 +426,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                       <>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
+                          className="h-3 w-3"
                           viewBox="0 0 20 20"
                           fill="currentColor"
                         >
@@ -439,7 +439,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                         PDF A4
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className={`h-4 w-4 transition-transform ${showPdfFormatDropdown ? "rotate-180" : ""}`}
+                          className={`h-3 w-3 transition-transform ${showPdfFormatDropdown ? "rotate-180" : ""}`}
                           viewBox="0 0 20 20"
                           fill="currentColor"
                         >
@@ -461,9 +461,9 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                         className="fixed inset-0 z-10"
                         onClick={() => setShowPdfFormatDropdown(false)}
                       />
-                      <div className="absolute right-0 top-full mt-2 w-64 bg-slate-800 border border-slate-600 rounded-lg shadow-xl z-20 overflow-hidden">
-                        <div className="p-2 border-b border-slate-700">
-                          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                      <div className="absolute right-0 top-full mt-1.5 w-52 bg-slate-800 border border-slate-600 rounded-md shadow-xl z-20 overflow-hidden">
+                        <div className="p-1.5 border-b border-slate-700">
+                          <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
                             Escolha o formato
                           </span>
                         </div>
@@ -471,12 +471,12 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                           <button
                             key={format.id}
                             onClick={() => handleDownloadPdf(format.id)}
-                            className="w-full px-4 py-3 text-left hover:bg-slate-700 transition-colors flex flex-col gap-0.5 cursor-pointer"
+                            className="w-full px-3 py-2 text-left hover:bg-slate-700 transition-colors flex flex-col gap-0.5 cursor-pointer"
                           >
-                            <span className="text-sm font-medium text-white">
+                            <span className="text-xs font-medium text-white">
                               {format.label}
                             </span>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-[10px] text-slate-400">
                               {format.description}
                             </span>
                           </button>
@@ -492,7 +492,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       </div>
 
       {/* Cards Grid */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-4">
         <Grid gridCols="4">
           <GridItem key={"add_card_button"}>
             <AddCardButton onClick={() => setIsOpen(true)} />
