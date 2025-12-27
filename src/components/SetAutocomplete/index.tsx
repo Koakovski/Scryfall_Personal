@@ -156,7 +156,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
       {isOpen && (
         <div
           ref={listRef}
-          className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-64 overflow-auto"
+          className="absolute z-[9999] w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-64 overflow-auto"
         >
           {loading ? (
             <div className="px-4 py-3 text-slate-400 text-center">
@@ -172,6 +172,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
                 key={set.id}
                 type="button"
                 onClick={() => handleSelect(set)}
+                title={set.name}
                 className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors cursor-pointer ${
                   index === highlightedIndex
                     ? "bg-purple-600/30 text-white"
