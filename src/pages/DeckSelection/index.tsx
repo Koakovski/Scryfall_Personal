@@ -72,7 +72,7 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
         </div>
 
         {/* Create Deck Card */}
-        <div className="mb-8">
+        <div className="mb-8 relative z-10">
           {isCreating ? (
             <div className="bg-slate-800/50 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 shadow-xl">
               <h3 className="text-lg font-semibold text-white mb-4">Criar Novo Deck</h3>
