@@ -3,7 +3,7 @@ import { searchCardsService } from "./serch-cards.service";
 /**
  * Busca variações de uma carta específica em uma coleção
  * Usa oracleId ou nome para identificar a carta
- * Retorna com unique: "art" para mostrar todas as variações de arte
+ * Retorna com unique: "prints" para mostrar todas as variações de impressão
  */
 export const searchCardVariationsBySetService = async (
   params: SearchCardVariationsBySetParams
@@ -18,7 +18,7 @@ export const searchCardVariationsBySetService = async (
   const result = await searchCardsService({
     text: searchQuery,
     page: params.page,
-    unique: "art",
+    unique: "prints",
     order: "set",
   });
 
