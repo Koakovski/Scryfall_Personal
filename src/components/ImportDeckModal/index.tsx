@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import { CardEntity } from "../../domain/entities/card.entity";
 import { DeckCardEntity } from "../../domain/entities/deck-card.entity";
 import { DeckEntity } from "../../domain/entities/deck.entity";
@@ -32,6 +32,22 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
   const [progress, setProgress] = useState<ImportProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [finalDeck, setFinalDeck] = useState<DeckEntity | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setCardList(content);
+    };
+    reader.readAsText(file);
+    
+    // Limpa o input para permitir selecionar o mesmo arquivo novamente
+    e.target.value = "";
+  };
 
   const parseCardList = (text: string): { quantity: number; name: string }[] => {
     const lines = text.split("\n").filter((line) => line.trim());
@@ -228,9 +244,25 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
 
               {/* Card List */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Lista de Cartas
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-300">
+                    Lista de Cartas
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-1.5 text-sm bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    <span>📄</span> Importar arquivo .txt
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".txt"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                </div>
                 <textarea
                   value={cardList}
                   onChange={(e) => setCardList(e.target.value)}
