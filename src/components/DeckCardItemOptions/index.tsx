@@ -14,12 +14,7 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
   onDeleteCard,
   onChangeCard,
 }) => {
-  const [showOptions, setShowOptions] = useState(false);
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
-
-  const handleCardClick = () => {
-    setShowOptions((prev) => !prev);
-  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -29,7 +24,6 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
   const handleChangeVersion = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsVersionModalOpen(true);
-    setShowOptions(false);
   };
 
   return (
@@ -45,25 +39,17 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
       <div
         key={card.id}
         className="relative cursor-pointer group"
-        onClick={handleCardClick}
-        onMouseLeave={() => setShowOptions(false)}
       >
         <CardItem card={card} />
 
-        {/* Overlay escuro quando opções estão visíveis */}
+        {/* Overlay escuro quando hover */}
         <div
-          className={`absolute inset-0 bg-black rounded-lg transition-opacity duration-200 pointer-events-none ${
-            showOptions ? "opacity-60" : "opacity-0"
-          }`}
+          className="absolute inset-0 bg-black rounded-lg transition-opacity duration-200 pointer-events-none opacity-0 group-hover:opacity-60"
         />
 
         {/* Botões de ação */}
         <div
-          className={`absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-200 ${
-            showOptions
-              ? "opacity-100"
-              : "opacity-0 pointer-events-none"
-          }`}
+          className="absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
         >
           <button
             onClick={handleDelete}
