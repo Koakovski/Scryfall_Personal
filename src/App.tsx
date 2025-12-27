@@ -24,6 +24,13 @@ const App = () => {
     setSelectedDeck(updatedDeck);
   };
 
+  const handleDeckDeleted = (deckId: string) => {
+    // Se o deck apagado for o selecionado, limpa a seleção
+    if (selectedDeck?.id === deckId) {
+      setSelectedDeck(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950">
       <Header
@@ -33,7 +40,7 @@ const App = () => {
       />
 
       {currentPage === "selection" && (
-        <DeckSelection onSelectDeck={handleSelectDeck} />
+        <DeckSelection onSelectDeck={handleSelectDeck} onDeckDeleted={handleDeckDeleted} />
       )}
 
       {currentPage === "editor" && selectedDeck && (

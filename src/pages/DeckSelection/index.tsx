@@ -5,9 +5,10 @@ import ImportDeckModal from "../../components/ImportDeckModal";
 
 type DeckSelectionProps = {
   onSelectDeck: (deck: DeckEntity) => void;
+  onDeckDeleted: (deckId: string) => void;
 };
 
-const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck }) => {
+const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) => {
   const [decks, setDecks] = useState<DeckEntity[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newDeckName, setNewDeckName] = useState("");
@@ -36,6 +37,7 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck }) => {
     e.stopPropagation();
     if (confirm("Tem certeza que deseja excluir este deck?")) {
       deckStorageService.deleteDeck(deckId);
+      onDeckDeleted(deckId);
       loadDecks();
     }
   };
