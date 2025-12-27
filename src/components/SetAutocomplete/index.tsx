@@ -27,6 +27,7 @@ const setTypeLabels: Record<SetType, string> = {
   token: "Tokens",
   memorabilia: "Memorabilia",
   minigame: "Minigame",
+  eternal: "Eternal",
 };
 
 // Ordem de prioridade dos tipos de set
@@ -34,6 +35,7 @@ const setTypeOrder: SetType[] = [
   "expansion",
   "core",
   "masters",
+  "eternal",
   "draft_innovation",
   "commander",
   "alchemy",

@@ -21,7 +21,8 @@ export type SetType =
   | "promo"
   | "token"
   | "memorabilia"
-  | "minigame";
+  | "minigame"
+  | "eternal";
 
 export type Set = {
   object: "set";
