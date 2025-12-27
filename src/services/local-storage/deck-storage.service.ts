@@ -88,5 +88,67 @@ export const deckStorageService = {
   clearAllDecks(): void {
     localStorage.removeItem(DECKS_STORAGE_KEY);
   },
+
+  /**
+   * Exporta todos os decks como JSON string
+   */
+  exportAllDecksAsJson(): string {
+    const decks = this.getAllDecksData();
+    return JSON.stringify(decks, null, 2);
+  },
+
+  /**
+   * Importa decks a partir de uma JSON string (array de decks)
+   * Adiciona ao array existente, gerando novos IDs para evitar conflitos
+   */
+  importDecksFromJson(jsonString: string): { imported: number; errors: number } {
+    try {
+      const importedDecks = JSON.parse(jsonString) as DeckData[];
+      
+      if (!Array.isArray(importedDecks)) {
+        return { imported: 0, errors: 1 };
+      }
+
+      let imported = 0;
+      let errors = 0;
+
+      for (const deckData of importedDecks) {
+        try {
+          // Gera um novo ID para evitar conflitos
+          const newData: DeckData = {
+            ...deckData,
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          const deck = DeckEntity.fromData(newData);
+          this.saveDeck(deck);
+          imported++;
+        } catch {
+          errors++;
+        }
+      }
+
+      return { imported, errors };
+    } catch {
+      return { imported: 0, errors: 1 };
+    }
+  },
+
+  /**
+   * Faz download do arquivo JSON com todos os decks
+   */
+  downloadAllDecksAsJson(): void {
+    const jsonString = this.exportAllDecksAsJson();
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `scryfall-decks-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  },
 };
 

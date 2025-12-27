@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { DeckEntity } from "../../domain/entities/deck.entity";
 import { PreferredSetEntity } from "../../domain/entities/preferred-set.entity";
 import { deckStorageService } from "../../services/local-storage";
@@ -16,6 +16,8 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
   const [newDeckName, setNewDeckName] = useState("");
   const [preferredSet, setPreferredSet] = useState<{ code: string; name: string } | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importJsonMessage, setImportJsonMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadDecks();
@@ -60,6 +62,50 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
     deckStorageService.saveDeck(deck);
     setIsImportModalOpen(false);
     loadDecks();
+  };
+
+  const handleExportAllDecks = () => {
+    if (decks.length === 0) {
+      setImportJsonMessage({ type: "error", text: "Não há decks para exportar." });
+      setTimeout(() => setImportJsonMessage(null), 3000);
+      return;
+    }
+    deckStorageService.downloadAllDecksAsJson();
+    setImportJsonMessage({ type: "success", text: `${decks.length} deck(s) exportado(s) com sucesso!` });
+    setTimeout(() => setImportJsonMessage(null), 3000);
+  };
+
+  const handleImportJsonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const result = deckStorageService.importDecksFromJson(content);
+      
+      if (result.imported > 0) {
+        setImportJsonMessage({ 
+          type: "success", 
+          text: `${result.imported} deck(s) importado(s) com sucesso!${result.errors > 0 ? ` (${result.errors} erro(s))` : ""}` 
+        });
+        loadDecks();
+      } else {
+        setImportJsonMessage({ 
+          type: "error", 
+          text: "Erro ao importar decks. Verifique se o arquivo é válido." 
+        });
+      }
+      setTimeout(() => setImportJsonMessage(null), 4000);
+    };
+    reader.readAsText(file);
+    
+    // Reset input para permitir importar o mesmo arquivo novamente
+    e.target.value = "";
   };
 
   return (
@@ -127,21 +173,62 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
               </div>
             </div>
           ) : (
-            <div className="flex gap-3">
-              <button
-                onClick={() => setIsCreating(true)}
-                className="flex-1 py-4 border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:border-amber-500/50 hover:text-amber-400 hover:bg-amber-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
-              >
-                <span className="text-2xl group-hover:scale-110 transition-transform">+</span>
-                <span className="text-sm font-medium">Criar Novo Deck</span>
-              </button>
-              <button
-                onClick={() => setIsImportModalOpen(true)}
-                className="flex-1 py-4 border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:border-purple-500/50 hover:text-purple-400 hover:bg-purple-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
-              >
-                <span className="text-2xl group-hover:scale-110 transition-transform">📋</span>
-                <span className="text-sm font-medium">Importar por Lista</span>
-              </button>
+            <div className="space-y-3">
+              {/* Botões principais */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsCreating(true)}
+                  className="flex-1 py-4 border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:border-amber-500/50 hover:text-amber-400 hover:bg-amber-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+                >
+                  <span className="text-2xl group-hover:scale-110 transition-transform">+</span>
+                  <span className="text-sm font-medium">Criar Novo Deck</span>
+                </button>
+                <button
+                  onClick={() => setIsImportModalOpen(true)}
+                  className="flex-1 py-4 border-2 border-dashed border-slate-600 rounded-lg text-slate-400 hover:border-purple-500/50 hover:text-purple-400 hover:bg-purple-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+                >
+                  <span className="text-2xl group-hover:scale-110 transition-transform">📋</span>
+                  <span className="text-sm font-medium">Importar por Lista</span>
+                </button>
+              </div>
+              
+              {/* Botões de Export/Import JSON */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleExportAllDecks}
+                  className="flex-1 py-3 border border-slate-600 rounded-lg text-slate-400 hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+                >
+                  <span className="text-lg group-hover:scale-110 transition-transform">📤</span>
+                  <span className="text-sm font-medium">Exportar Decks (JSON)</span>
+                </button>
+                <button
+                  onClick={handleImportJsonClick}
+                  className="flex-1 py-3 border border-slate-600 rounded-lg text-slate-400 hover:border-cyan-500/50 hover:text-cyan-400 hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+                >
+                  <span className="text-lg group-hover:scale-110 transition-transform">📥</span>
+                  <span className="text-sm font-medium">Importar Decks (JSON)</span>
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept=".json,application/json"
+                  className="hidden"
+                />
+              </div>
+
+              {/* Mensagem de feedback */}
+              {importJsonMessage && (
+                <div
+                  className={`p-3 rounded-lg text-sm font-medium text-center ${
+                    importJsonMessage.type === "success"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      : "bg-red-500/20 text-red-300 border border-red-500/30"
+                  }`}
+                >
+                  {importJsonMessage.text}
+                </div>
+              )}
             </div>
           )}
         </div>
