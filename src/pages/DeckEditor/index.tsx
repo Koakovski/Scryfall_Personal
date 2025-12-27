@@ -179,7 +179,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       )}
 
       {/* Deck Info Bar */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700">
+      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex-shrink-0">
             <h2 className="text-xl font-bold text-white">{deck.name}</h2>

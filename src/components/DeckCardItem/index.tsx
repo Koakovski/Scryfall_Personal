@@ -71,7 +71,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
         <CardItem card={card} isFlipped={isFlipped} onFlipChange={setIsFlipped} />
 
         {/* Badges no canto superior direito - sempre visíveis */}
-        <div className="absolute top-1 right-1 flex items-center gap-1 z-10">
+        <div className="absolute top-1 right-1 flex items-center gap-1 z-[5]">
           {/* Indicador de carta double-faced */}
           {card.isDoubleFaced && (
             <button
@@ -112,7 +112,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
 
         {/* Badge de tokens - mostra quantidade de tokens */}
         {tokens.length > 0 && (
-          <div className="absolute top-1 left-1 z-20">
+          <div className="absolute top-1 left-1 z-[5]">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -132,7 +132,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
             {isTokensListOpen && (
               <div
                 className="absolute top-full left-0 mt-2 bg-slate-900/95 backdrop-blur-sm 
-                           border border-slate-600 rounded-xl shadow-2xl p-3 z-50
+                           border border-slate-600 rounded-xl shadow-2xl p-3 z-[6]
                            min-w-[200px] max-w-[280px]"
                 onClick={(e) => e.stopPropagation()}
               >
