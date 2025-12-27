@@ -179,8 +179,8 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       )}
 
       {/* Deck Info Bar */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex-shrink-0">
             <h2 className="text-xl font-bold text-white">{deck.name}</h2>
             <p className="text-sm text-slate-400">
@@ -292,7 +292,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       </div>
 
       {/* Cards Grid */}
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-6 py-6">
         <Grid gridCols="4">
           <GridItem key={"add_card_button"}>
             <AddCardButton onClick={() => setIsOpen(true)} />
