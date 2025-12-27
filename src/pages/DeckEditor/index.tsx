@@ -30,6 +30,8 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       ? { code: deck.preferredSet.code, name: deck.preferredSet.name }
       : null
   );
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState(deck.name);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [showPdfFormatDropdown, setShowPdfFormatDropdown] = useState(false);
@@ -51,6 +53,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
         ? { code: deck.preferredSet.code, name: deck.preferredSet.name }
         : null
     );
+    setEditingName(deck.name);
   }, [deck]);
 
   const saveDeck = (updatedCards: DeckCardEntity[]) => {
@@ -86,6 +89,25 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
         ? { code: deck.preferredSet.code, name: deck.preferredSet.name }
         : null
     );
+  };
+
+  const saveDeckName = () => {
+    const trimmedName = editingName.trim();
+    if (!trimmedName) return;
+
+    const updatedDeck = DeckEntity.fromData({
+      ...deck.toData(),
+      name: trimmedName,
+      updatedAt: new Date().toISOString(),
+    });
+    deckStorageService.saveDeck(updatedDeck);
+    onDeckUpdate(updatedDeck);
+    setIsEditingName(false);
+  };
+
+  const handleCancelNameEdit = () => {
+    setIsEditingName(false);
+    setEditingName(deck.name);
   };
 
   function onSelectCard(card: CardEntity, tokens?: CardEntity[]) {
@@ -216,7 +238,47 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex-shrink-0">
-            <h2 className="text-xl font-bold text-white">{deck.name}</h2>
+            {isEditingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveDeckName();
+                    if (e.key === "Escape") handleCancelNameEdit();
+                  }}
+                  className="px-3 py-1.5 bg-slate-900/80 border border-amber-500/50 rounded-lg text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  autoFocus
+                />
+                <button
+                  onClick={saveDeckName}
+                  disabled={!editingName.trim()}
+                  className="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  ✓
+                </button>
+                <button
+                  onClick={handleCancelNameEdit}
+                  className="px-3 py-1.5 bg-slate-600 text-white text-sm font-medium rounded hover:bg-slate-500 transition-colors cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <div
+                onClick={() => setIsEditingName(true)}
+                className="group flex items-center gap-2 cursor-pointer"
+                title="Clique para editar o nome"
+              >
+                <h2 className="text-xl font-bold text-white group-hover:text-amber-300 transition-colors">
+                  {deck.name}
+                </h2>
+                <span className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity">
+                  ✏️
+                </span>
+              </div>
+            )}
             <p className="text-sm text-slate-400">
               {cards.reduce((sum, c) => sum + c.quantity, 0)} cartas no deck (
               {cards.length} únicas)
