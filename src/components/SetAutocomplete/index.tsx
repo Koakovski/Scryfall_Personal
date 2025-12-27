@@ -1,6 +1,66 @@
-import { FC, useState, useEffect, useRef } from "react";
+import { FC, useState, useEffect, useRef, useMemo } from "react";
 import { getAllSetsService } from "../../services/scryfall-api/services/sets/get-all-sets.service";
-import { Set } from "../../services/scryfall-api/types/set";
+import { Set, SetType } from "../../services/scryfall-api/types/set";
+
+// Mapeamento de nomes amigáveis para os tipos de set
+const setTypeLabels: Record<SetType, string> = {
+  core: "Coleções Principais",
+  expansion: "Expansões",
+  masters: "Masters",
+  alchemy: "Alchemy",
+  masterpiece: "Masterpiece",
+  arsenal: "Arsenal",
+  from_the_vault: "From the Vault",
+  spellbook: "Spellbook",
+  premium_deck: "Premium Deck",
+  duel_deck: "Duel Deck",
+  draft_innovation: "Draft Innovation",
+  treasure_chest: "Treasure Chest",
+  commander: "Commander",
+  planechase: "Planechase",
+  archenemy: "Archenemy",
+  vanguard: "Vanguard",
+  funny: "Funny / Un-Sets",
+  starter: "Starter",
+  box: "Box Sets",
+  promo: "Promos",
+  token: "Tokens",
+  memorabilia: "Memorabilia",
+  minigame: "Minigame",
+};
+
+// Ordem de prioridade dos tipos de set
+const setTypeOrder: SetType[] = [
+  "expansion",
+  "core",
+  "masters",
+  "draft_innovation",
+  "commander",
+  "alchemy",
+  "masterpiece",
+  "arsenal",
+  "from_the_vault",
+  "spellbook",
+  "premium_deck",
+  "duel_deck",
+  "planechase",
+  "archenemy",
+  "vanguard",
+  "starter",
+  "box",
+  "funny",
+  "promo",
+  "token",
+  "memorabilia",
+  "treasure_chest",
+  "minigame",
+];
+
+type GroupedSets = {
+  type: SetType;
+  label: string;
+  sets: Set[];
+}[];
 
 type SetAutocompleteProps = {
   value: { code: string; name: string } | null;
@@ -53,7 +113,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
   // Filtra os sets baseado na query
   useEffect(() => {
     if (!query.trim()) {
-      setFilteredSets(allSets.slice(0, 20)); // Mostra os 20 mais recentes se não tiver busca
+      setFilteredSets(allSets.slice(0, 50)); // Mostra os 50 mais recentes se não tiver busca
     } else {
       const lowerQuery = query.toLowerCase();
       const filtered = allSets.filter(
@@ -61,10 +121,35 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
           set.name.toLowerCase().includes(lowerQuery) ||
           set.code.toLowerCase().includes(lowerQuery)
       );
-      setFilteredSets(filtered.slice(0, 20));
+      setFilteredSets(filtered.slice(0, 50));
     }
     setHighlightedIndex(0);
   }, [query, allSets]);
+
+  // Agrupa os sets filtrados por tipo
+  const groupedSets: GroupedSets = useMemo(() => {
+    const groups: Record<SetType, Set[]> = {} as Record<SetType, Set[]>;
+    
+    for (const set of filteredSets) {
+      if (!groups[set.set_type]) {
+        groups[set.set_type] = [];
+      }
+      groups[set.set_type].push(set);
+    }
+
+    return setTypeOrder
+      .filter((type) => groups[type]?.length > 0)
+      .map((type) => ({
+        type,
+        label: setTypeLabels[type],
+        sets: groups[type],
+      }));
+  }, [filteredSets]);
+
+  // Cria lista flat para navegação por teclado
+  const flatSets = useMemo(() => {
+    return groupedSets.flatMap((group) => group.sets);
+  }, [groupedSets]);
 
   const handleSelect = (set: Set) => {
     onChange({ code: set.code, name: set.name });
@@ -90,7 +175,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
       case "ArrowDown":
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev < filteredSets.length - 1 ? prev + 1 : prev
+          prev < flatSets.length - 1 ? prev + 1 : prev
         );
         break;
       case "ArrowUp":
@@ -99,8 +184,8 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
         break;
       case "Enter":
         e.preventDefault();
-        if (filteredSets[highlightedIndex]) {
-          handleSelect(filteredSets[highlightedIndex]);
+        if (flatSets[highlightedIndex]) {
+          handleSelect(flatSets[highlightedIndex]);
         }
         break;
       case "Escape":
@@ -111,15 +196,15 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
 
   // Scroll para o item destacado
   useEffect(() => {
-    if (isOpen && listRef.current) {
-      const highlightedElement = listRef.current.children[
-        highlightedIndex
-      ] as HTMLElement;
+    if (isOpen && listRef.current && flatSets[highlightedIndex]) {
+      const highlightedElement = listRef.current.querySelector(
+        `[data-set-id="${flatSets[highlightedIndex].id}"]`
+      ) as HTMLElement;
       if (highlightedElement) {
         highlightedElement.scrollIntoView({ block: "nearest" });
       }
     }
-  }, [highlightedIndex, isOpen]);
+  }, [highlightedIndex, isOpen, flatSets]);
 
   return (
     <div className={`relative ${className}`}>
@@ -162,37 +247,50 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
             <div className="px-4 py-3 text-slate-400 text-center">
               Carregando coleções...
             </div>
-          ) : filteredSets.length === 0 ? (
+          ) : groupedSets.length === 0 ? (
             <div className="px-4 py-3 text-slate-400 text-center">
               Nenhuma coleção encontrada
             </div>
           ) : (
-            filteredSets.map((set, index) => (
-              <button
-                key={set.id}
-                type="button"
-                onClick={() => handleSelect(set)}
-                title={set.name}
-                className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors cursor-pointer ${
-                  index === highlightedIndex
-                    ? "bg-purple-600/30 text-white"
-                    : "text-slate-300 hover:bg-slate-700"
-                }`}
-              >
-                <img
-                  src={set.icon_svg_uri}
-                  alt={set.name}
-                  className="w-6 h-6 object-contain"
-                  style={{ filter: "invert(1)" }}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{set.name}</p>
-                  <p className="text-xs text-slate-500">
-                    {set.code.toUpperCase()} • {set.card_count} cartas •{" "}
-                    {new Date(set.released_at).getFullYear()}
-                  </p>
+            groupedSets.map((group) => (
+              <div key={group.type}>
+                {/* Header do grupo */}
+                <div className="px-4 py-2 bg-slate-900/80 text-xs font-semibold text-purple-400 uppercase tracking-wider sticky top-0 border-b border-slate-700">
+                  {group.label}
                 </div>
-              </button>
+                {/* Sets do grupo */}
+                {group.sets.map((set) => {
+                  const flatIndex = flatSets.findIndex((s) => s.id === set.id);
+                  return (
+                    <button
+                      key={set.id}
+                      type="button"
+                      data-set-id={set.id}
+                      onClick={() => handleSelect(set)}
+                      title={set.name}
+                      className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors cursor-pointer ${
+                        flatIndex === highlightedIndex
+                          ? "bg-purple-600/30 text-white"
+                          : "text-slate-300 hover:bg-slate-700"
+                      }`}
+                    >
+                      <img
+                        src={set.icon_svg_uri}
+                        alt={set.name}
+                        className="w-6 h-6 object-contain"
+                        style={{ filter: "invert(1)" }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{set.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {set.code.toUpperCase()} • {set.card_count} cartas •{" "}
+                          {new Date(set.released_at).getFullYear()}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             ))
           )}
         </div>
