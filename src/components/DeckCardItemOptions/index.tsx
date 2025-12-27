@@ -15,6 +15,7 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
   onChangeCard,
 }) => {
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,7 +41,35 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
         key={card.id}
         className="relative cursor-pointer group"
       >
-        <CardItem card={card} />
+        <CardItem card={card} isFlipped={isFlipped} onFlipChange={setIsFlipped} />
+
+        {/* Indicador de carta double-faced - sempre visível */}
+        {card.isDoubleFaced && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsFlipped(!isFlipped);
+            }}
+            className="absolute top-1 right-1 bg-gradient-to-br from-indigo-500 to-violet-600 
+                       text-white w-5 h-5 rounded-full 
+                       flex items-center justify-center shadow-md border border-white
+                       hover:from-indigo-400 hover:to-violet-500 transition-all z-10"
+            title={isFlipped ? "Ver frente" : "Ver verso"}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3 w-3"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        )}
 
         {/* Overlay escuro quando hover */}
         <div
@@ -72,26 +101,52 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
             Apagar
           </button>
 
-          <button
-            onClick={handleChangeVersion}
-            className="px-4 py-2 bg-slate-700/90 text-slate-200 font-medium rounded-lg shadow-lg 
-                       hover:bg-slate-600 hover:scale-105 transform transition-all duration-150
-                       flex items-center gap-2 min-w-[140px] justify-center border border-slate-600"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+          <div className="flex items-center gap-2">
+            {/* Botão flip para cartas double-faced */}
+            {card.isDoubleFaced && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFlipped(!isFlipped);
+                }}
+                className="px-3 py-2 bg-indigo-600/90 text-white font-medium rounded-lg shadow-lg 
+                           hover:bg-indigo-500 hover:scale-105 transform transition-all duration-150
+                           flex items-center gap-1.5 justify-center border border-indigo-400/50"
+                title={isFlipped ? "Ver frente" : "Ver verso"}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Virar
+              </button>
+            )}
+
+            <button
+              onClick={handleChangeVersion}
+              className="px-3 py-2 bg-slate-700/90 text-slate-200 font-medium rounded-lg shadow-lg 
+                         hover:bg-slate-600 hover:scale-105 transform transition-all duration-150
+                         flex items-center gap-1.5 justify-center border border-slate-600"
             >
-              <path
-                fillRule="evenodd"
-                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Trocar Versão
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+              </svg>
+              Versão
+            </button>
+          </div>
         </div>
       </div>
     </>
