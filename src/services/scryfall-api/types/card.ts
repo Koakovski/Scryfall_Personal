@@ -89,6 +89,21 @@ export type CardPreview = {
   previewed_at: string;
 };
 
+export type RelatedCardComponent =
+  | "token"
+  | "meld_part"
+  | "meld_result"
+  | "combo_piece";
+
+export type RelatedCard = {
+  object: "related_card";
+  id: string;
+  component: RelatedCardComponent;
+  name: string;
+  type_line: string;
+  uri: string;
+};
+
 export type Card = {
   object: "card";
   id: string;
@@ -157,6 +172,7 @@ export type Card = {
   prices: CardPrices;
   related_uris?: Record<string, string>;
   purchase_uris?: Record<string, string>;
+  all_parts?: RelatedCard[];
 };
 
 export type CardFace = {

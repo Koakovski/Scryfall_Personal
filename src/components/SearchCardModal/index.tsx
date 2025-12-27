@@ -3,14 +3,21 @@ import { CardEntity } from "../../domain/entities/card.entity";
 import { PreferredSetEntity } from "../../domain/entities/preferred-set.entity";
 import { searchCardsService } from "../../services/scryfall-api/services/cards/serch-cards.service";
 import { getCardByNameAndSetService } from "../../services/scryfall-api/services/cards/get-card-by-name-and-set.service";
+import { getCardTokensService } from "../../services/scryfall-api/services/cards/get-card-tokens.service";
+import { Card } from "../../services/scryfall-api/types/card";
 import Grid from "../Grid";
 import GridItem from "../GridItem";
 import CardItem from "../CardItem";
 import Loader from "../Loader";
 
+type CardWithRawData = {
+  entity: CardEntity;
+  rawData: Card;
+};
+
 type SearchCardModalProps = {
   close: () => void;
-  onSelectCard: (card: CardEntity) => void;
+  onSelectCard: (card: CardEntity, tokens?: CardEntity[]) => void;
   preferredSet?: PreferredSetEntity;
 };
 
@@ -20,14 +27,20 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
   preferredSet,
 }) => {
   const [query, setQuery] = useState("");
-  const [cards, setCards] = useState<CardEntity[]>([]);
+  const [cards, setCards] = useState<CardWithRawData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const fetchData = async (text: string) => {
     setLoading(true);
     const result = await searchCardsService({ text });
     if (result.success) {
-      setCards(result.data.data.map((card) => CardEntity.new(card)));
+      setCards(
+        result.data.data.map((card) => ({
+          entity: CardEntity.new(card),
+          rawData: card,
+        }))
+      );
     }
     setLoading(false);
   };
@@ -44,29 +57,39 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
   }, [query]);
 
   /**
-   * Quando o usuário seleciona uma carta, tenta buscar a versão da coleção preferencial.
-   * Se encontrar, usa essa versão; caso contrário, usa a carta selecionada.
+   * Quando o usuário seleciona uma carta, tenta buscar a versão da coleção preferencial
+   * e também busca os tokens associados à carta.
    */
-  const handleSelectCard = async (card: CardEntity) => {
+  const handleSelectCard = async (cardWithData: CardWithRawData) => {
+    if (isSelecting) return;
+    setIsSelecting(true);
+
+    let finalCard = cardWithData.entity;
+    let cardForTokens = cardWithData.rawData;
+
     if (preferredSet) {
       // Tenta buscar a carta na coleção preferencial
       const preferredResult = await getCardByNameAndSetService(
-        card.name,
+        cardWithData.entity.name,
         preferredSet.code
       );
 
       if (preferredResult.success) {
         // Encontrou na coleção preferencial, usa essa versão
-        const preferredCard = CardEntity.new(preferredResult.data);
-        onSelectCard(preferredCard);
-        close();
-        return;
+        finalCard = CardEntity.new(preferredResult.data);
+        cardForTokens = preferredResult.data;
       }
     }
 
-    // Não tem coleção preferencial ou não encontrou, usa a carta original
-    onSelectCard(card);
+    // Busca os tokens da carta
+    const tokens = await getCardTokensService(
+      cardForTokens.all_parts ? cardForTokens : cardWithData.rawData,
+      preferredSet?.code
+    );
+
+    onSelectCard(finalCard, tokens.length > 0 ? tokens : undefined);
     close();
+    setIsSelecting(false);
   };
 
   return (
@@ -104,14 +127,14 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
           )}
           {!loading && cards.length > 0 && (
             <Grid gridCols="6">
-              {cards.map((card) => (
+              {cards.map((cardWithData) => (
                 <div
-                  key={card.id}
-                  onClick={() => handleSelectCard(card)}
-                  className="cursor-pointer"
+                  key={cardWithData.entity.id}
+                  onClick={() => handleSelectCard(cardWithData)}
+                  className={`cursor-pointer ${isSelecting ? "opacity-50 pointer-events-none" : ""}`}
                 >
-                  <GridItem key={card.id}>
-                    <CardItem card={card} />
+                  <GridItem key={cardWithData.entity.id}>
+                    <CardItem card={cardWithData.entity} />
                   </GridItem>
                 </div>
               ))}

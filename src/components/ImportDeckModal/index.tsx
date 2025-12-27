@@ -5,6 +5,7 @@ import { DeckEntity } from "../../domain/entities/deck.entity";
 import { PreferredSetEntity } from "../../domain/entities/preferred-set.entity";
 import { getCardByNameService } from "../../services/scryfall-api/services/cards/get-card-by-name.service";
 import { getCardByNameAndSetService } from "../../services/scryfall-api/services/cards/get-card-by-name-and-set.service";
+import { getCardTokensService } from "../../services/scryfall-api/services/cards/get-card-tokens.service";
 import Loader from "../Loader";
 import SetAutocomplete from "../SetAutocomplete";
 
@@ -96,7 +97,9 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
       const result = await getCardByNameService(name);
 
       if (result.success) {
-        let cardEntity = CardEntity.new(result.data);
+        const originalCard = result.data;
+        let cardEntity = CardEntity.new(originalCard);
+        let cardForTokens = originalCard;
 
         // Se tiver coleção preferencial, tenta buscar a versão dessa coleção
         if (preferredSet) {
@@ -106,13 +109,20 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
           );
           if (preferredResult.success) {
             cardEntity = CardEntity.new(preferredResult.data);
+            cardForTokens = preferredResult.data;
           }
           // Delay adicional para a segunda requisição
           await delay(100);
         }
 
-        // Cria uma DeckCardEntity com a quantidade correta
-        const deckCard = DeckCardEntity.new(cardEntity, quantity);
+        // Busca os tokens da carta
+        const tokens = await getCardTokensService(
+          cardForTokens.all_parts ? cardForTokens : originalCard,
+          preferredSet?.code
+        );
+
+        // Cria uma DeckCardEntity com a quantidade correta e tokens
+        const deckCard = DeckCardEntity.new(cardEntity, quantity, tokens);
         foundCards.push(deckCard);
         processedCount += quantity;
         setProgress((prev) => ({

@@ -73,7 +73,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     );
   };
 
-  function onSelectCard(card: CardEntity) {
+  function onSelectCard(card: CardEntity, tokens?: CardEntity[]) {
     // Verifica se a carta já existe no deck (pelo oracleId para considerar versões diferentes)
     const existingIndex = cards.findIndex(
       (c) => c.card.oracleId === card.oracleId
@@ -87,8 +87,8 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       setCards(updatedCards);
       saveDeck(updatedCards);
     } else {
-      // Adiciona nova carta com quantidade 1
-      const newDeckCard = DeckCardEntity.new(card, 1);
+      // Adiciona nova carta com quantidade 1 e seus tokens
+      const newDeckCard = DeckCardEntity.new(card, 1, tokens);
       const newCards = [newDeckCard, ...cards];
       setCards(newCards);
       saveDeck(newCards);
@@ -122,6 +122,14 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     const updatedCardsList = [...cards];
     // Usa withCardVariation para alterar apenas a versão da carta
     updatedCardsList[index] = cards[index].withCardVariation(newCard);
+    setCards(updatedCardsList);
+    saveDeck(updatedCardsList);
+  };
+
+  const onChangeToken = (cardIndex: number, tokenIndex: number, newToken: CardEntity) => {
+    const updatedCardsList = [...cards];
+    // Usa withTokenVariation para alterar apenas a versão do token
+    updatedCardsList[cardIndex] = cards[cardIndex].withTokenVariation(tokenIndex, newToken);
     setCards(updatedCardsList);
     saveDeck(updatedCardsList);
   };
@@ -202,9 +210,11 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
               <DeckCardItem
                 card={deckCard.card}
                 quantity={deckCard.quantity}
+                tokens={deckCard.tokens}
                 onIncreaseQuantity={() => onIncreaseQuantity(index)}
                 onDecreaseQuantity={() => onDecreaseQuantity(index)}
                 onChangeCard={(newCard) => onChangeCard(index, newCard)}
+                onChangeToken={(tokenIndex, newToken) => onChangeToken(index, tokenIndex, newToken)}
               />
             </GridItem>
           ))}

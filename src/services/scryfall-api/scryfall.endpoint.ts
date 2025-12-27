@@ -7,6 +7,10 @@ export class ScryfallEndPoint {
     return "/cards/named";
   }
 
+  static cardById(id: string) {
+    return `/cards/${id}`;
+  }
+
   static sets() {
     return "/sets";
   }
