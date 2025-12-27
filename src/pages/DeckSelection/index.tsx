@@ -18,6 +18,7 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importJsonMessage, setImportJsonMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const singleFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadDecks();
@@ -98,6 +99,47 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
         setImportJsonMessage({ 
           type: "error", 
           text: "Erro ao importar decks. Verifique se o arquivo é válido." 
+        });
+      }
+      setTimeout(() => setImportJsonMessage(null), 4000);
+    };
+    reader.readAsText(file);
+    
+    // Reset input para permitir importar o mesmo arquivo novamente
+    e.target.value = "";
+  };
+
+  const handleExportSingleDeck = (deck: DeckEntity, e: React.MouseEvent) => {
+    e.stopPropagation();
+    deckStorageService.downloadDeckAsJson(deck);
+    setImportJsonMessage({ type: "success", text: `Deck "${deck.name}" exportado com sucesso!` });
+    setTimeout(() => setImportJsonMessage(null), 3000);
+  };
+
+  const handleImportSingleJsonClick = () => {
+    singleFileInputRef.current?.click();
+  };
+
+  const handleSingleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const deck = deckStorageService.importDeckFromJson(content);
+      
+      if (deck) {
+        deckStorageService.saveDeck(deck);
+        setImportJsonMessage({ 
+          type: "success", 
+          text: `Deck "${deck.name}" importado com sucesso!` 
+        });
+        loadDecks();
+      } else {
+        setImportJsonMessage({ 
+          type: "error", 
+          text: "Erro ao importar deck. Verifique se o arquivo é válido." 
         });
       }
       setTimeout(() => setImportJsonMessage(null), 4000);
@@ -192,26 +234,44 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
                 </button>
               </div>
               
-              {/* Botões de Export/Import JSON */}
+              {/* Botões de Export/Import JSON - Todos os decks */}
               <div className="flex gap-3">
                 <button
                   onClick={handleExportAllDecks}
                   className="flex-1 py-3 border border-slate-600 rounded-lg text-slate-400 hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
                 >
                   <span className="text-lg group-hover:scale-110 transition-transform">📤</span>
-                  <span className="text-sm font-medium">Exportar Decks (JSON)</span>
+                  <span className="text-sm font-medium">Exportar Todos (JSON)</span>
                 </button>
                 <button
                   onClick={handleImportJsonClick}
                   className="flex-1 py-3 border border-slate-600 rounded-lg text-slate-400 hover:border-cyan-500/50 hover:text-cyan-400 hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
                 >
                   <span className="text-lg group-hover:scale-110 transition-transform">📥</span>
-                  <span className="text-sm font-medium">Importar Decks (JSON)</span>
+                  <span className="text-sm font-medium">Importar Vários (JSON)</span>
                 </button>
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
+                  accept=".json,application/json"
+                  className="hidden"
+                />
+              </div>
+
+              {/* Botão de Import JSON - Deck único */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleImportSingleJsonClick}
+                  className="flex-1 py-3 border border-slate-600 rounded-lg text-slate-400 hover:border-teal-500/50 hover:text-teal-400 hover:bg-teal-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+                >
+                  <span className="text-lg group-hover:scale-110 transition-transform">📄</span>
+                  <span className="text-sm font-medium">Importar Deck Único (JSON)</span>
+                </button>
+                <input
+                  type="file"
+                  ref={singleFileInputRef}
+                  onChange={handleSingleFileChange}
                   accept=".json,application/json"
                   className="hidden"
                 />
@@ -252,13 +312,22 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
                   <div className="w-10 h-10 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-base shadow-md">
                     🃏
                   </div>
-                  <button
-                    onClick={(e) => handleDeleteDeck(deck.id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all cursor-pointer"
-                    title="Excluir deck"
-                  >
-                    🗑️
-                  </button>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={(e) => handleExportSingleDeck(deck, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all cursor-pointer"
+                      title="Exportar deck como JSON"
+                    >
+                      📤
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteDeck(deck.id, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all cursor-pointer"
+                      title="Excluir deck"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
                 <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-amber-300 transition-colors">
                   {deck.name}

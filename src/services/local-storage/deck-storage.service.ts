@@ -64,6 +64,24 @@ export const deckStorageService = {
   },
 
   /**
+   * Faz download de um deck individual como JSON
+   */
+  downloadDeckAsJson(deck: DeckEntity): void {
+    const jsonString = this.exportDeckAsJson(deck);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    // Sanitiza o nome do deck para nome de arquivo
+    const safeName = deck.name.replace(/[^a-zA-Z0-9\-_\s]/g, "").replace(/\s+/g, "-");
+    link.download = `${safeName}-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  },
+
+  /**
    * Importa um deck a partir de uma JSON string
    */
   importDeckFromJson(jsonString: string): DeckEntity | null {

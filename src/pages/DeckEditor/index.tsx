@@ -324,6 +324,16 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                     : "Definir Coleção"}
                 </button>
                 
+                {/* Botão de Exportar JSON */}
+                <button
+                  onClick={() => deckStorageService.downloadDeckAsJson(deck)}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 bg-cyan-600/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-600/30"
+                  title="Exportar deck como JSON"
+                >
+                  <span>📄</span>
+                  JSON
+                </button>
+
                 {/* Botão de Download ZIP */}
                 <button
                   onClick={handleDownloadDeck}
