@@ -1,75 +1,45 @@
-import {  useState } from "react";
-import Grid from "./components/Grid";
-import GridItem from "./components/GridItem";
-import { CardEntity } from "./domain/entities/card.entity";
-import AddCardButton from "./components/AddCardButton";
-import SearchCardModal from "./components/SearchCardModal";
-import DeckCardItemOptions from "./components/DeckCardItemOptions";
+import { useState } from "react";
+import Header from "./components/Header";
+import DeckSelection from "./pages/DeckSelection";
+import DeckEditor from "./pages/DeckEditor";
+import { DeckEntity } from "./domain/entities/deck.entity";
+
+type Page = "selection" | "editor";
 
 const App = () => {
-  const [cards, setCards] = useState<CardEntity[]>([]);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<Page>("selection");
+  const [selectedDeck, setSelectedDeck] = useState<DeckEntity | null>(null);
 
-  function onSelectCard(card: CardEntity) {
-    setCards((prev) => [card, ...prev]);
-  }
-
-  const onDeleteCard = (card: CardEntity) => {
-    setCards((prev) => prev.filter((currCard) => currCard.id !== card.id));
+  const handleSelectDeck = (deck: DeckEntity) => {
+    setSelectedDeck(deck);
+    setCurrentPage("editor");
   };
 
-  const onChangeCard = (oldCard: CardEntity, newCard: CardEntity) => {
-    setCards((prevCards) => {
-      const cardIndex = prevCards.findIndex((card) => card.id === oldCard.id);
-
-      if (cardIndex !== -1) {
-        const updatedCardsList = [...prevCards];
-        updatedCardsList[cardIndex] = newCard;
-        return updatedCardsList;
-      } else {
-        return prevCards;
-      }
-    });
+  const handleNavigate = (page: Page) => {
+    if (page === "editor" && !selectedDeck) return;
+    setCurrentPage(page);
   };
 
-/*   useEffect(() => {
-    (async () => {
-      // POPULATE THE ARRAY TO TESTS
-      const result = await searchCardsService({ text: "signet" });
-      if (result.success) {
-        setCards(result.data.data.map((card) => CardEntity.new(card)));
-      }
-    })();
-  }, []); */
+  const handleDeckUpdate = (updatedDeck: DeckEntity) => {
+    setSelectedDeck(updatedDeck);
+  };
 
   return (
-    <>
-      {isOpen && (
-        <SearchCardModal
-          close={() => {
-            setIsOpen(false);
-          }}
-          onSelectCard={onSelectCard}
-        />
+    <div className="min-h-screen bg-slate-950">
+      <Header
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        deckName={selectedDeck?.name}
+      />
+
+      {currentPage === "selection" && (
+        <DeckSelection onSelectDeck={handleSelectDeck} />
       )}
 
-      <div className="mr-30 ml-30">
-        <Grid gridCols="4">
-          <GridItem key={"add_card_button"}>
-            <AddCardButton onClick={() => setIsOpen(true)} />
-          </GridItem>
-          {cards.map((card) => (
-            <GridItem key={card.id}>
-              <DeckCardItemOptions
-                card={card}
-                onDeleteCard={onDeleteCard}
-                onChangeCard={onChangeCard}
-              />
-            </GridItem>
-          ))}
-        </Grid>
-      </div>
-    </>
+      {currentPage === "editor" && selectedDeck && (
+        <DeckEditor deck={selectedDeck} onDeckUpdate={handleDeckUpdate} />
+      )}
+    </div>
   );
 };
 
