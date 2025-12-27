@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import Grid from "./components/Grid";
 import GridItem from "./components/GridItem";
 import { CardEntity } from "./domain/entities/card.entity";
 import AddCardButton from "./components/AddCardButton";
 import SearchCardModal from "./components/SearchCardModal";
-import { searchCardsService } from "./services/scryfall-api/services/cards/serch-cards.service";
 import DeckCardItemOptions from "./components/DeckCardItemOptions";
 
 const App = () => {

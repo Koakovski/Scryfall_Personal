@@ -74,8 +74,17 @@ const SearchCardModal: FC<SearchCardModalProps> = ({ close, onSelectCard }) => {
               ))}
             </Grid>
           )}
+          {!loading && !query.trim() && cards.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500">Busque por um card</p>
+            </div>
+          )}
+          {!loading && query.trim().length > 0 && cards.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500">Nenhum resultado encontrado</p>
+            </div>
+          )}
         </div>
-
         <div className="mt-2 flex justify-end">
           <button
             onClick={close}
