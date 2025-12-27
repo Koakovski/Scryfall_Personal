@@ -10,6 +10,7 @@ import DeckCardItem from "../../components/DeckCardItem";
 import SetAutocomplete from "../../components/SetAutocomplete";
 import { DeckEntity } from "../../domain/entities/deck.entity";
 import { deckStorageService } from "../../services/local-storage";
+import { downloadDeckAsZip } from "../../services/deck-download";
 
 type DeckEditorProps = {
   deck: DeckEntity;
@@ -28,6 +29,12 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
       ? { code: deck.preferredSet.code, name: deck.preferredSet.name }
       : null
   );
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<{
+    current: number;
+    total: number;
+    currentCard: string;
+  } | null>(null);
 
   useEffect(() => {
     setCards(deck.cards);
@@ -134,6 +141,31 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     saveDeck(updatedCardsList);
   };
 
+  const handleDownloadDeck = async () => {
+    if (cards.length === 0) return;
+    
+    setIsDownloading(true);
+    setDownloadProgress(null);
+    
+    try {
+      // Recria o deck atual para garantir que temos os dados mais recentes
+      const currentDeck = DeckEntity.fromData({
+        ...deck.toData(),
+        cards: cards.map((c) => c.toData()),
+      });
+      
+      await downloadDeckAsZip(currentDeck, (progress) => {
+        setDownloadProgress(progress);
+      });
+    } catch (error) {
+      console.error("Erro ao baixar deck:", error);
+      alert("Erro ao baixar o deck. Tente novamente.");
+    } finally {
+      setIsDownloading(false);
+      setDownloadProgress(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950">
       {isOpen && (
@@ -157,7 +189,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
             </p>
           </div>
 
-          {/* Coleção preferencial */}
+          {/* Coleção preferencial e Download */}
           <div className="flex items-center gap-3">
             {isEditingSet ? (
               <div className="flex items-center gap-2 bg-slate-900/80 p-3 rounded-lg border border-purple-500/30">
@@ -181,19 +213,79 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => setIsEditingSet(true)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
-                  deck.preferredSet
-                    ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 hover:bg-purple-600/30"
-                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                }`}
-              >
-                <span>📦</span>
-                {deck.preferredSet
-                  ? `${deck.preferredSet.name} (${deck.preferredSet.code.toUpperCase()})`
-                  : "Definir Coleção"}
-              </button>
+              <>
+                <button
+                  onClick={() => setIsEditingSet(true)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                    deck.preferredSet
+                      ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 hover:bg-purple-600/30"
+                      : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  }`}
+                >
+                  <span>📦</span>
+                  {deck.preferredSet
+                    ? `${deck.preferredSet.name} (${deck.preferredSet.code.toUpperCase()})`
+                    : "Definir Coleção"}
+                </button>
+                
+                {/* Botão de Download */}
+                <button
+                  onClick={handleDownloadDeck}
+                  disabled={isDownloading || cards.length === 0}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                    isDownloading
+                      ? "bg-emerald-600/40 text-emerald-300 border border-emerald-500/40"
+                      : cards.length === 0
+                      ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                      : "bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30"
+                  }`}
+                  title={cards.length === 0 ? "Adicione cartas para baixar" : "Baixar imagens do deck"}
+                >
+                  {isDownloading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      {downloadProgress
+                        ? `${downloadProgress.current}/${downloadProgress.total}`
+                        : "Preparando..."}
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Baixar Imagens
+                    </>
+                  )}
+                </button>
+              </>
             )}
           </div>
         </div>
