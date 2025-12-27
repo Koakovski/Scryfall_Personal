@@ -24,7 +24,8 @@ const ChangeCardVariationModal: FC<ChangeCardVariationModalProps> = ({
     const fetchData = async () => {
       setLoading(true);
       const result = await searchCardVariationsService({
-        oracleId: card.oracleId,
+        oracleId: card.oracleId || undefined,
+        name: card.name,
       });
       if (result.success) {
         setCards(result.data.data.map((card) => CardEntity.new(card)));
@@ -33,7 +34,7 @@ const ChangeCardVariationModal: FC<ChangeCardVariationModalProps> = ({
     };
 
     fetchData();
-  }, []);
+  }, [card.name, card.oracleId]);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-1000">

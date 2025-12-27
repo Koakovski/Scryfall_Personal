@@ -69,4 +69,18 @@ export class CardEntity {
   toData(): CardData {
     return { ...this.data };
   }
+
+  /**
+   * Cria uma nova versão da carta, alterando apenas id, imageUri, setName e collectorNumber
+   * Mantém o oracleId e name originais
+   */
+  withVariation(newVersion: CardEntity): CardEntity {
+    return new CardEntity({
+      ...this.data,
+      id: newVersion.id,
+      imageUri: newVersion.normalImageUri,
+      setName: newVersion.setName,
+      collectorNumber: newVersion.collectorNumber,
+    });
+  }
 }

@@ -6,7 +6,7 @@ import ChangeCardVariationModal from "../ChangeCardVariationModal";
 type DeckCardItemOptionsProps = {
   card: CardEntity;
   onDeleteCard: () => void;
-  onChangeCard: (oldCard: CardEntity, newCard: CardEntity) => void;
+  onChangeCard: (newCard: CardEntity) => void;
 };
 
 const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
@@ -38,7 +38,7 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
         <ChangeCardVariationModal
           card={card}
           close={() => setIsVersionModalOpen(false)}
-          onChangeCard={onChangeCard}
+          onChangeCard={(_, newCard) => onChangeCard(newCard)}
         />
       )}
 

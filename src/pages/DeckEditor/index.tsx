@@ -44,15 +44,12 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     saveDeck(newCards);
   };
 
-  const onChangeCard = (oldCard: CardEntity, newCard: CardEntity) => {
-    const cardIndex = cards.findIndex((card) => card.id === oldCard.id);
-
-    if (cardIndex !== -1) {
-      const updatedCardsList = [...cards];
-      updatedCardsList[cardIndex] = newCard;
-      setCards(updatedCardsList);
-      saveDeck(updatedCardsList);
-    }
+  const onChangeCard = (index: number, newCard: CardEntity) => {
+    const updatedCardsList = [...cards];
+    // Usa withVariation para alterar apenas id, imageUri, setName e collectorNumber
+    updatedCardsList[index] = cards[index].withVariation(newCard);
+    setCards(updatedCardsList);
+    saveDeck(updatedCardsList);
   };
 
   return (
@@ -87,7 +84,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
               <DeckCardItemOptions
                 card={card}
                 onDeleteCard={() => onDeleteCard(index)}
-                onChangeCard={onChangeCard}
+                onChangeCard={(newCard) => onChangeCard(index, newCard)}
               />
             </GridItem>
           ))}
