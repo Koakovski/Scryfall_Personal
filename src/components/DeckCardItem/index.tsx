@@ -67,9 +67,9 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
 
         {/* Badge de quantidade - sempre visível */}
         <div
-          className="absolute top-2 right-2 bg-gradient-to-br from-amber-500 to-orange-600 
-                     text-white font-bold text-lg w-8 h-8 rounded-full 
-                     flex items-center justify-center shadow-lg border-2 border-white
+          className="absolute top-1 right-1 bg-gradient-to-br from-amber-500 to-orange-600 
+                     text-white font-bold text-xs w-5 h-5 rounded-full 
+                     flex items-center justify-center shadow-md border border-white
                      z-10"
         >
           {quantity}
@@ -77,19 +77,19 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
 
         {/* Badge de tokens - mostra quantidade de tokens */}
         {tokens.length > 0 && (
-          <div className="absolute top-2 left-2 z-20">
+          <div className="absolute top-1 left-1 z-20">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsTokensListOpen(!isTokensListOpen);
               }}
               className="bg-gradient-to-br from-purple-500 to-fuchsia-600 
-                         text-white font-bold text-sm px-2 py-1 rounded-full 
-                         flex items-center gap-1 shadow-lg border-2 border-white
+                         text-white font-bold text-xs px-1.5 py-0.5 rounded-full 
+                         flex items-center gap-0.5 shadow-md border border-white
                          hover:from-purple-400 hover:to-fuchsia-500 transition-all"
               title="Ver tokens"
             >
-              <span>🎭</span>
+              <span className="text-[10px]">🎭</span>
               <span>{tokens.length}</span>
             </button>
 
