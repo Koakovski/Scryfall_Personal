@@ -406,6 +406,23 @@ export async function downloadDeckAsPdf(
     }
   }
 
+  // Coleta apenas as imagens de tokens para preenchimento
+  const tokenImages = cardImages.filter((img) => img.name.startsWith("Token:"));
+
+  // Calcula se há espaços em branco na última página e preenche com tokens
+  const cardsPerPage = config.cols * config.rows;
+  const remainder = expandedImages.length % cardsPerPage;
+  
+  if (remainder > 0 && tokenImages.length > 0) {
+    const emptySlots = cardsPerPage - remainder;
+    
+    // Preenche os espaços em branco com tokens (repetindo se necessário)
+    for (let i = 0; i < emptySlots; i++) {
+      const tokenIndex = i % tokenImages.length;
+      expandedImages.push(tokenImages[tokenIndex]);
+    }
+  }
+
   // Gera o PDF
   const pdf = new jsPDF({
     orientation: "portrait",
