@@ -57,6 +57,19 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     total: number;
     currentCard: string;
   } | null>(null);
+  const [collapsedSections, setCollapsedSections] = useState<Set<CardType>>(new Set());
+
+  const toggleSection = (type: CardType) => {
+    setCollapsedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(type)) {
+        next.delete(type);
+      } else {
+        next.add(type);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     setCards(deck.cards);
@@ -553,11 +566,28 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
           cardsByType.map(([type, cardsOfType]) => {
             const config = TYPE_CONFIG[type];
             const totalQuantity = cardsOfType.reduce((sum, { deckCard }) => sum + deckCard.quantity, 0);
+            const isCollapsed = collapsedSections.has(type);
             
             return (
               <section key={type} className="space-y-3">
-                {/* Header da seção */}
-                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg bg-gradient-to-r ${config.color} border backdrop-blur-sm`}>
+                {/* Header da seção - clicável para minimizar */}
+                <button
+                  onClick={() => toggleSection(type)}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-gradient-to-r ${config.color} border backdrop-blur-sm cursor-pointer hover:brightness-110 transition-all`}
+                >
+                  {/* Ícone de expandir/colapsar */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isCollapsed ? "-rotate-90" : "rotate-0"}`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                   <span className="text-xl">{config.icon}</span>
                   <h3 className="text-white font-semibold text-sm">
                     {config.label}
@@ -565,27 +595,33 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                   <span className="text-slate-400 text-xs">
                     ({totalQuantity} {totalQuantity === 1 ? "carta" : "cartas"})
                   </span>
-                </div>
+                </button>
                 
-                {/* Grid de cartas */}
-                <Grid gridCols="4">
-                  {cardsOfType.map(({ deckCard, originalIndex }) => (
-                    <GridItem key={`${deckCard.cardId}-${originalIndex}`}>
-                      <DeckCardItem
-                        card={deckCard.card}
-                        quantity={deckCard.quantity}
-                        tokens={deckCard.tokens}
-                        onIncreaseQuantity={() => onIncreaseQuantity(originalIndex)}
-                        onDecreaseQuantity={() => onDecreaseQuantity(originalIndex)}
-                        onChangeCard={(newCard) => onChangeCard(originalIndex, newCard)}
-                        onChangeToken={(tokenIndex, newToken) => onChangeToken(originalIndex, tokenIndex, newToken)}
-                        onSetAsCover={() => handleSetAsCover(deckCard.cardId)}
-                        isCoverCard={deck.coverCardId === deckCard.cardId}
-                        preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
-                      />
-                    </GridItem>
-                  ))}
-                </Grid>
+                {/* Grid de cartas - com animação de colapso */}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    isCollapsed ? "max-h-0 opacity-0" : "max-h-[5000px] opacity-100"
+                  }`}
+                >
+                  <Grid gridCols="4">
+                    {cardsOfType.map(({ deckCard, originalIndex }) => (
+                      <GridItem key={`${deckCard.cardId}-${originalIndex}`}>
+                        <DeckCardItem
+                          card={deckCard.card}
+                          quantity={deckCard.quantity}
+                          tokens={deckCard.tokens}
+                          onIncreaseQuantity={() => onIncreaseQuantity(originalIndex)}
+                          onDecreaseQuantity={() => onDecreaseQuantity(originalIndex)}
+                          onChangeCard={(newCard) => onChangeCard(originalIndex, newCard)}
+                          onChangeToken={(tokenIndex, newToken) => onChangeToken(originalIndex, tokenIndex, newToken)}
+                          onSetAsCover={() => handleSetAsCover(deckCard.cardId)}
+                          isCoverCard={deck.coverCardId === deckCard.cardId}
+                          preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
+                        />
+                      </GridItem>
+                    ))}
+                  </Grid>
+                </div>
               </section>
             );
           })
