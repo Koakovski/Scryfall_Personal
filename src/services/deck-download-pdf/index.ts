@@ -132,15 +132,13 @@ async function loadDoubleFacedImageAsBase64(
     const tryMerge = () => {
       if (!frontLoaded || !backLoaded) return;
 
-      // Cria um canvas com o dobro da largura para colocar as duas imagens lado a lado
       const canvas = document.createElement("canvas");
-      // Cada face ocupa metade do espaço da carta
-      // Mantemos a proporção original das imagens
-      const singleWidth = frontImg.naturalWidth;
-      const singleHeight = frontImg.naturalHeight;
+      const originalWidth = frontImg.naturalWidth;
+      const originalHeight = frontImg.naturalHeight;
 
-      canvas.width = singleWidth * 2;
-      canvas.height = singleHeight;
+      // Canvas com tamanho de uma carta normal (orientação retrato)
+      canvas.width = originalWidth;
+      canvas.height = originalHeight;
 
       const ctx = canvas.getContext("2d");
       if (!ctx) {
@@ -148,9 +146,22 @@ async function loadDoubleFacedImageAsBase64(
         return;
       }
 
-      // Desenha a frente à esquerda e o verso à direita
-      ctx.drawImage(frontImg, 0, 0, singleWidth, singleHeight);
-      ctx.drawImage(backImg, singleWidth, 0, singleWidth, singleHeight);
+      // Cada carta rotacionada ocupa metade da altura
+      const halfHeight = originalHeight / 2;
+
+      // Desenha a frente em cima, rotacionada 90 graus
+      ctx.save();
+      ctx.translate(originalWidth / 2, halfHeight / 2);
+      ctx.rotate(Math.PI / 2);
+      ctx.drawImage(frontImg, -halfHeight / 2, -originalWidth / 2, halfHeight, originalWidth);
+      ctx.restore();
+
+      // Desenha o verso embaixo, rotacionado 90 graus
+      ctx.save();
+      ctx.translate(originalWidth / 2, halfHeight + halfHeight / 2);
+      ctx.rotate(Math.PI / 2);
+      ctx.drawImage(backImg, -halfHeight / 2, -originalWidth / 2, halfHeight, originalWidth);
+      ctx.restore();
 
       const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
       resolve(dataUrl);
