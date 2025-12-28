@@ -7,6 +7,7 @@ export interface DeckData {
   name: string;
   cards: DeckCardData[];
   preferredSet?: PreferredSetData;
+  coverCardId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,6 +51,41 @@ export class DeckEntity {
     return this.data.preferredSet
       ? PreferredSetEntity.fromData(this.data.preferredSet)
       : undefined;
+  }
+
+  /**
+   * Retorna o ID da carta de capa do deck
+   */
+  get coverCardId(): string | undefined {
+    return this.data.coverCardId;
+  }
+
+  /**
+   * Retorna a carta de capa do deck (se existir e estiver no deck)
+   */
+  get coverCard(): CardEntity | undefined {
+    if (!this.data.coverCardId) return undefined;
+    const deckCard = this.data.cards.find(
+      (c) => c.card.id === this.data.coverCardId
+    );
+    return deckCard ? CardEntity.fromData(deckCard.card) : undefined;
+  }
+
+  /**
+   * Retorna a URL da imagem de capa do deck.
+   * Usa a carta de capa se definida, senão a primeira carta do deck.
+   */
+  get coverImageUri(): string | undefined {
+    // Tenta usar a carta de capa definida
+    const cover = this.coverCard;
+    if (cover) return cover.normalImageUri;
+
+    // Fallback: usa a primeira carta do deck
+    if (this.data.cards.length > 0) {
+      return CardEntity.fromData(this.data.cards[0].card).normalImageUri;
+    }
+
+    return undefined;
   }
 
   /**
@@ -175,6 +211,16 @@ export class DeckEntity {
    */
   updatePreferredSet(preferredSet?: PreferredSetEntity): this {
     this.data.preferredSet = preferredSet?.toData();
+    this.data.updatedAt = new Date().toISOString();
+    return this;
+  }
+
+  /**
+   * Define a carta de capa do deck
+   * @param cardId ID da carta a ser usada como capa, ou undefined para remover
+   */
+  setCoverCard(cardId?: string): this {
+    this.data.coverCardId = cardId;
     this.data.updatedAt = new Date().toISOString();
     return this;
   }

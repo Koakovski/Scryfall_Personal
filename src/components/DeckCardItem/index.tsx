@@ -11,6 +11,8 @@ type DeckCardItemProps = {
   onDecreaseQuantity: () => void;
   onChangeCard: (newCard: CardEntity) => void;
   onChangeToken?: (tokenIndex: number, newToken: CardEntity) => void;
+  onSetAsCover?: () => void;
+  isCoverCard?: boolean;
   preferredSet?: { code: string; name: string } | null;
 };
 
@@ -22,6 +24,8 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
   onDecreaseQuantity,
   onChangeCard,
   onChangeToken,
+  onSetAsCover,
+  isCoverCard = false,
   preferredSet,
 }) => {
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
@@ -72,6 +76,18 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
 
         {/* Badges no canto superior direito - sempre visíveis */}
         <div className="absolute top-0.5 right-0.5 flex items-center gap-0.5 z-[5]">
+          {/* Indicador de carta de capa */}
+          {isCoverCard && (
+            <div
+              className="bg-gradient-to-br from-emerald-500 to-teal-600 
+                         text-white w-4 h-4 rounded-full 
+                         flex items-center justify-center shadow-md border border-white"
+              title="Carta de capa do deck"
+            >
+              <span className="text-[8px]">⭐</span>
+            </div>
+          )}
+
           {/* Indicador de carta double-faced */}
           {card.isDoubleFaced && (
             <button
@@ -296,6 +312,23 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
               </svg>
               Versão
             </button>
+
+            {/* Botão definir como capa */}
+            {onSetAsCover && !isCoverCard && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSetAsCover();
+                }}
+                className="px-2 py-1.5 bg-emerald-600/90 text-white text-xs font-medium rounded-md shadow-lg 
+                           hover:bg-emerald-500 hover:scale-105 transform transition-all duration-150
+                           flex items-center gap-1 justify-center border border-emerald-400/50"
+                title="Definir como capa do deck"
+              >
+                <span className="text-[10px]">⭐</span>
+                Capa
+              </button>
+            )}
           </div>
         </div>
       </div>

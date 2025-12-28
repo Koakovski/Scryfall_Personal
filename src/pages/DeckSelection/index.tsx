@@ -309,9 +309,19 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
                 className="group bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-lg p-4 cursor-pointer hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-900/10 transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-base shadow-md">
-                    🃏
-                  </div>
+                  {deck.coverImageUri ? (
+                    <div className="w-12 h-16 rounded-md overflow-hidden shadow-md border border-slate-600 group-hover:border-amber-500/50 transition-colors">
+                      <img
+                        src={deck.coverImageUri}
+                        alt={`Capa de ${deck.name}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-16 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-xl shadow-md border border-slate-600">
+                      🃏
+                    </div>
+                  )}
                   <div className="flex gap-1">
                     <button
                       onClick={(e) => handleExportSingleDeck(deck, e)}

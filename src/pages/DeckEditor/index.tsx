@@ -171,6 +171,16 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     saveDeck(updatedCardsList);
   };
 
+  const handleSetAsCover = (cardId: string) => {
+    const updatedDeck = DeckEntity.fromData({
+      ...deck.toData(),
+      coverCardId: cardId,
+      updatedAt: new Date().toISOString(),
+    });
+    deckStorageService.saveDeck(updatedDeck);
+    onDeckUpdate(updatedDeck);
+  };
+
   const handleDownloadDeck = async () => {
     if (cards.length === 0) return;
     
@@ -517,6 +527,8 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                 onDecreaseQuantity={() => onDecreaseQuantity(index)}
                 onChangeCard={(newCard) => onChangeCard(index, newCard)}
                 onChangeToken={(tokenIndex, newToken) => onChangeToken(index, tokenIndex, newToken)}
+                onSetAsCover={() => handleSetAsCover(deckCard.cardId)}
+                isCoverCard={deck.coverCardId === deckCard.cardId}
                 preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
               />
             </GridItem>
