@@ -89,6 +89,23 @@ export class DeckEntity {
   }
 
   /**
+   * Retorna a URL da arte (art_crop) da carta de capa do deck.
+   * Usa a carta de capa se definida, senão a primeira carta do deck.
+   */
+  get coverArtCropUri(): string | undefined {
+    // Tenta usar a carta de capa definida
+    const cover = this.coverCard;
+    if (cover) return cover.artCropUri;
+
+    // Fallback: usa a primeira carta do deck
+    if (this.data.cards.length > 0) {
+      return CardEntity.fromData(this.data.cards[0].card).artCropUri;
+    }
+
+    return undefined;
+  }
+
+  /**
    * Retorna o número de cartas únicas no deck
    */
   get uniqueCardCount(): number {

@@ -306,61 +306,74 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
               <div
                 key={deck.id}
                 onClick={() => onSelectDeck(deck)}
-                className="group bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-lg p-4 cursor-pointer hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-900/10 transition-all duration-300 hover:-translate-y-1"
+                className="group bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden cursor-pointer hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-900/20 transition-all duration-300 hover:-translate-y-1"
               >
-                <div className="flex items-start justify-between mb-3">
-                  {deck.coverImageUri ? (
-                    <div className="w-12 h-16 rounded-md overflow-hidden shadow-md border border-slate-600 group-hover:border-amber-500/50 transition-colors">
+                {/* Arte de Capa */}
+                <div className="relative h-32 overflow-hidden">
+                  {deck.coverArtCropUri ? (
+                    <>
                       <img
-                        src={deck.coverImageUri}
-                        alt={`Capa de ${deck.name}`}
-                        className="w-full h-full object-cover"
+                        src={deck.coverArtCropUri}
+                        alt={`Arte de ${deck.name}`}
+                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
                       />
-                    </div>
+                      {/* Gradiente para legibilidade */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+                    </>
                   ) : (
-                    <div className="w-12 h-16 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-xl shadow-md border border-slate-600">
-                      🃏
+                    <div className="w-full h-full bg-gradient-to-br from-purple-600 via-indigo-600 to-slate-800 flex items-center justify-center">
+                      <span className="text-5xl opacity-50">🃏</span>
                     </div>
                   )}
-                  <div className="flex gap-1">
+                  
+                  {/* Botões de ação no canto */}
+                  <div className="absolute top-2 right-2 flex gap-1">
                     <button
                       onClick={(e) => handleExportSingleDeck(deck, e)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-black/50 backdrop-blur-sm text-emerald-400 hover:bg-black/70 hover:text-emerald-300 transition-all cursor-pointer"
                       title="Exportar deck como JSON"
                     >
                       📤
                     </button>
                     <button
                       onClick={(e) => handleDeleteDeck(deck.id, e)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-black/50 backdrop-blur-sm text-red-400 hover:bg-black/70 hover:text-red-300 transition-all cursor-pointer"
                       title="Excluir deck"
                     >
                       🗑️
                     </button>
                   </div>
+
+                  {/* Nome do deck sobre a arte */}
+                  <div className="absolute bottom-2 left-3 right-3">
+                    <h3 className="text-lg font-bold text-white drop-shadow-lg group-hover:text-amber-300 transition-colors truncate">
+                      {deck.name}
+                    </h3>
+                  </div>
                 </div>
-                <h3 className="text-base font-bold text-white mb-1.5 group-hover:text-amber-300 transition-colors">
-                  {deck.name}
-                </h3>
-                <div className="flex flex-col gap-0.5 text-xs text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <span>📇</span> {deck.totalCardCount} cartas ({deck.uniqueCardCount} únicas)
-                  </span>
-                  {deck.preferredSet && (
-                    <span className="flex items-center gap-1 text-purple-400">
-                      <span>📦</span> {deck.preferredSet.name} ({deck.preferredSet.code.toUpperCase()})
+
+                {/* Informações do deck */}
+                <div className="p-3">
+                  <div className="flex flex-col gap-1 text-xs text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <span>📇</span> {deck.totalCardCount} cartas ({deck.uniqueCardCount} únicas)
                     </span>
-                  )}
-                </div>
-                <div className="mt-3 pt-3 border-t border-slate-700">
-                  <p className="text-[10px] text-slate-500">
-                    Atualizado em{" "}
-                    {new Date(deck.updatedAt).toLocaleDateString("pt-BR", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
+                    {deck.preferredSet && (
+                      <span className="flex items-center gap-1.5 text-purple-400">
+                        <span>📦</span> {deck.preferredSet.name} ({deck.preferredSet.code.toUpperCase()})
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-slate-700/50">
+                    <p className="text-[10px] text-slate-500">
+                      Atualizado em{" "}
+                      {new Date(deck.updatedAt).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}

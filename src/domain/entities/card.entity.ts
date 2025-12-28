@@ -112,6 +112,14 @@ export class CardEntity {
     return !!this.data.backImageUri;
   }
 
+  /**
+   * Retorna a URL da arte da carta (art_crop do Scryfall)
+   * Deriva da URL normal substituindo o tamanho
+   */
+  get artCropUri(): string {
+    return this.data.imageUri.replace("/normal/", "/art_crop/");
+  }
+
   toData(): CardData {
     return { ...this.data };
   }
