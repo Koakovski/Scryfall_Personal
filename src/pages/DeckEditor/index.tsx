@@ -1,10 +1,9 @@
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useMemo } from "react";
 import Grid from "../../components/Grid";
 import GridItem from "../../components/GridItem";
-import { CardEntity } from "../../domain/entities/card.entity";
+import { CardEntity, CardType, CARD_TYPES } from "../../domain/entities/card.entity";
 import { DeckCardEntity } from "../../domain/entities/deck-card.entity";
 import { PreferredSetEntity } from "../../domain/entities/preferred-set.entity";
-import AddCardButton from "../../components/AddCardButton";
 import SearchCardModal from "../../components/SearchCardModal";
 import DeckCardItem from "../../components/DeckCardItem";
 import SetAutocomplete from "../../components/SetAutocomplete";
@@ -12,6 +11,19 @@ import { DeckEntity } from "../../domain/entities/deck.entity";
 import { deckStorageService } from "../../services/local-storage";
 import { downloadDeckAsZip } from "../../services/deck-download";
 import { downloadDeckAsPdf, PDF_FORMATS, PdfFormat } from "../../services/deck-download-pdf";
+
+/** Mapeamento de tipos para ícones e cores */
+const TYPE_CONFIG: Record<CardType, { icon: string; label: string; color: string }> = {
+  Creature: { icon: "🐉", label: "Criaturas", color: "from-green-500/20 to-green-600/10 border-green-500/30" },
+  Planeswalker: { icon: "✨", label: "Planeswalkers", color: "from-amber-500/20 to-amber-600/10 border-amber-500/30" },
+  Battle: { icon: "⚔️", label: "Batalhas", color: "from-red-500/20 to-red-600/10 border-red-500/30" },
+  Artifact: { icon: "⚙️", label: "Artefatos", color: "from-slate-400/20 to-slate-500/10 border-slate-400/30" },
+  Enchantment: { icon: "🔮", label: "Encantamentos", color: "from-purple-500/20 to-purple-600/10 border-purple-500/30" },
+  Instant: { icon: "⚡", label: "Mágicas Instantâneas", color: "from-blue-500/20 to-blue-600/10 border-blue-500/30" },
+  Sorcery: { icon: "📜", label: "Feitiços", color: "from-rose-500/20 to-rose-600/10 border-rose-500/30" },
+  Land: { icon: "🏔️", label: "Terrenos", color: "from-amber-700/20 to-amber-800/10 border-amber-700/30" },
+  Other: { icon: "❓", label: "Outros", color: "from-slate-600/20 to-slate-700/10 border-slate-600/30" },
+};
 
 type DeckEditorProps = {
   deck: DeckEntity;
@@ -180,6 +192,24 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     deckStorageService.saveDeck(updatedDeck);
     onDeckUpdate(updatedDeck);
   };
+
+  /** Agrupa as cartas por tipo principal */
+  const cardsByType = useMemo(() => {
+    const grouped = new Map<CardType, { deckCard: DeckCardEntity; originalIndex: number }[]>();
+    
+    // Inicializa os grupos na ordem dos tipos
+    for (const type of [...CARD_TYPES, "Other" as const]) {
+      grouped.set(type, []);
+    }
+    
+    cards.forEach((deckCard, originalIndex) => {
+      const mainType = deckCard.card.mainType;
+      grouped.get(mainType)?.push({ deckCard, originalIndex });
+    });
+    
+    // Remove grupos vazios e retorna como array
+    return Array.from(grouped.entries()).filter(([, cards]) => cards.length > 0);
+  }, [cards]);
 
   const handleDownloadDeck = async () => {
     if (cards.length === 0) return;
@@ -511,30 +541,70 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
         </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <Grid gridCols="4">
-          <GridItem key={"add_card_button"}>
-            <AddCardButton onClick={() => setIsOpen(true)} />
-          </GridItem>
-          {cards.map((deckCard, index) => (
-            <GridItem key={`${deckCard.cardId}-${index}`}>
-              <DeckCardItem
-                card={deckCard.card}
-                quantity={deckCard.quantity}
-                tokens={deckCard.tokens}
-                onIncreaseQuantity={() => onIncreaseQuantity(index)}
-                onDecreaseQuantity={() => onDecreaseQuantity(index)}
-                onChangeCard={(newCard) => onChangeCard(index, newCard)}
-                onChangeToken={(tokenIndex, newToken) => onChangeToken(index, tokenIndex, newToken)}
-                onSetAsCover={() => handleSetAsCover(deckCard.cardId)}
-                isCoverCard={deck.coverCardId === deckCard.cardId}
-                preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
-              />
-            </GridItem>
-          ))}
-        </Grid>
+      {/* Cards por Seções de Tipo */}
+      <div className="max-w-7xl mx-auto px-4 py-4 pb-24 space-y-6">
+        {cards.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🃏</div>
+            <p className="text-slate-400 text-lg">Seu deck está vazio</p>
+            <p className="text-slate-500 text-sm mt-1">Clique no botão + para adicionar cartas</p>
+          </div>
+        ) : (
+          cardsByType.map(([type, cardsOfType]) => {
+            const config = TYPE_CONFIG[type];
+            const totalQuantity = cardsOfType.reduce((sum, { deckCard }) => sum + deckCard.quantity, 0);
+            
+            return (
+              <section key={type} className="space-y-3">
+                {/* Header da seção */}
+                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg bg-gradient-to-r ${config.color} border backdrop-blur-sm`}>
+                  <span className="text-xl">{config.icon}</span>
+                  <h3 className="text-white font-semibold text-sm">
+                    {config.label}
+                  </h3>
+                  <span className="text-slate-400 text-xs">
+                    ({totalQuantity} {totalQuantity === 1 ? "carta" : "cartas"})
+                  </span>
+                </div>
+                
+                {/* Grid de cartas */}
+                <Grid gridCols="4">
+                  {cardsOfType.map(({ deckCard, originalIndex }) => (
+                    <GridItem key={`${deckCard.cardId}-${originalIndex}`}>
+                      <DeckCardItem
+                        card={deckCard.card}
+                        quantity={deckCard.quantity}
+                        tokens={deckCard.tokens}
+                        onIncreaseQuantity={() => onIncreaseQuantity(originalIndex)}
+                        onDecreaseQuantity={() => onDecreaseQuantity(originalIndex)}
+                        onChangeCard={(newCard) => onChangeCard(originalIndex, newCard)}
+                        onChangeToken={(tokenIndex, newToken) => onChangeToken(originalIndex, tokenIndex, newToken)}
+                        onSetAsCover={() => handleSetAsCover(deckCard.cardId)}
+                        isCoverCard={deck.coverCardId === deckCard.cardId}
+                        preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
+                      />
+                    </GridItem>
+                  ))}
+                </Grid>
+              </section>
+            );
+          })
+        )}
       </div>
+
+      {/* Botão Flutuante de Adicionar Carta */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 
+                   text-white text-3xl font-bold rounded-full shadow-2xl shadow-amber-900/50
+                   hover:from-amber-400 hover:to-orange-500 hover:scale-110 
+                   active:scale-95 transition-all duration-200 z-50
+                   flex items-center justify-center cursor-pointer
+                   ring-4 ring-amber-500/20"
+        title="Adicionar carta"
+      >
+        +
+      </button>
     </div>
   );
 };
