@@ -20,6 +20,7 @@ export interface PdfFormatConfig {
   rows: number;
   cardWidth: number;
   cardHeight: number;
+  rotate90: boolean;
 }
 
 export const PDF_FORMATS: PdfFormatConfig[] = [
@@ -31,6 +32,7 @@ export const PDF_FORMATS: PdfFormatConfig[] = [
     rows: 3,
     cardWidth: 63,
     cardHeight: 88,
+    rotate90: false,
   },
   {
     id: "4x4",
@@ -40,6 +42,7 @@ export const PDF_FORMATS: PdfFormatConfig[] = [
     rows: 4,
     cardWidth: 50,
     cardHeight: 69,
+    rotate90: false,
   },
   {
     id: "3x6",
@@ -49,6 +52,7 @@ export const PDF_FORMATS: PdfFormatConfig[] = [
     rows: 6,
     cardWidth: 66,
     cardHeight: 47,
+    rotate90: true,
   },
 ];
 
@@ -81,16 +85,25 @@ type ProgressCallback = (progress: DownloadProgress) => void;
 
 /**
  * Carrega uma imagem e retorna como base64 data URL
+ * @param imageUrl - URL da imagem
+ * @param rotate90 - Se true, rotaciona a imagem 90 graus no sentido horário
  */
-async function loadImageAsBase64(imageUrl: string): Promise<string> {
+async function loadImageAsBase64(imageUrl: string, rotate90: boolean = false): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
 
     img.onload = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
+      
+      if (rotate90) {
+        // Quando rotacionamos 90 graus, largura e altura são trocadas
+        canvas.width = img.naturalHeight;
+        canvas.height = img.naturalWidth;
+      } else {
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+      }
 
       const ctx = canvas.getContext("2d");
       if (!ctx) {
@@ -98,7 +111,15 @@ async function loadImageAsBase64(imageUrl: string): Promise<string> {
         return;
       }
 
-      ctx.drawImage(img, 0, 0);
+      if (rotate90) {
+        // Rotaciona 90 graus no sentido horário
+        ctx.translate(canvas.width, 0);
+        ctx.rotate(Math.PI / 2);
+        ctx.drawImage(img, 0, 0);
+      } else {
+        ctx.drawImage(img, 0, 0);
+      }
+      
       const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
       resolve(dataUrl);
     };
@@ -115,10 +136,14 @@ async function loadImageAsBase64(imageUrl: string): Promise<string> {
 
 /**
  * Carrega uma imagem e cria versão combinada para carta double-faced (frente e verso lado a lado)
+ * @param frontUrl - URL da imagem frontal
+ * @param backUrl - URL da imagem traseira
+ * @param rotate90 - Se true, rotaciona a imagem combinada 90 graus no sentido horário
  */
 async function loadDoubleFacedImageAsBase64(
   frontUrl: string,
-  backUrl: string
+  backUrl: string,
+  rotate90: boolean = false
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const frontImg = new Image();
@@ -163,8 +188,28 @@ async function loadDoubleFacedImageAsBase64(
       ctx.drawImage(backImg, -halfHeight / 2, -originalWidth / 2, halfHeight, originalWidth);
       ctx.restore();
 
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-      resolve(dataUrl);
+      // Se rotate90 está ativo, rotaciona a imagem combinada
+      if (rotate90) {
+        const rotatedCanvas = document.createElement("canvas");
+        rotatedCanvas.width = originalHeight;
+        rotatedCanvas.height = originalWidth;
+        
+        const rotatedCtx = rotatedCanvas.getContext("2d");
+        if (!rotatedCtx) {
+          reject(new Error("Não foi possível criar contexto do canvas rotacionado"));
+          return;
+        }
+        
+        rotatedCtx.translate(rotatedCanvas.width, 0);
+        rotatedCtx.rotate(Math.PI / 2);
+        rotatedCtx.drawImage(canvas, 0, 0);
+        
+        const dataUrl = rotatedCanvas.toDataURL("image/jpeg", 0.92);
+        resolve(dataUrl);
+      } else {
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+        resolve(dataUrl);
+      }
     };
 
     frontImg.onload = () => {
@@ -248,6 +293,7 @@ export async function downloadDeckAsPdf(
 ): Promise<void> {
   const config = getFormatConfig(format);
   const { marginX, marginY } = calculateMargins(config);
+  const { rotate90 } = config;
   const cards = deck.cards;
 
   // Agrupa cartas por nome para versões
@@ -293,11 +339,12 @@ export async function downloadDeckAsPdf(
           // Para cartas double-faced, combina frente e verso lado a lado
           dataUrl = await loadDoubleFacedImageAsBase64(
             card.normalImageUri,
-            card.backImageUri
+            card.backImageUri,
+            rotate90
           );
         } else {
           // Para cartas normais, carrega apenas a frente
-          dataUrl = await loadImageAsBase64(card.normalImageUri);
+          dataUrl = await loadImageAsBase64(card.normalImageUri, rotate90);
         }
 
         cardImages.push({
@@ -324,7 +371,7 @@ export async function downloadDeckAsPdf(
       });
 
       try {
-        const dataUrl = await loadImageAsBase64(token.normalImageUri);
+        const dataUrl = await loadImageAsBase64(token.normalImageUri, rotate90);
         cardImages.push({
           dataUrl,
           quantity: 1, // Tokens sempre 1 cópia
