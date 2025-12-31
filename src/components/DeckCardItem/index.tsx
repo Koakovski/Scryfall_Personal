@@ -2,16 +2,20 @@ import { FC, useState } from "react";
 import { CardEntity } from "../../domain/entities/card.entity";
 import CardItem from "../CardItem";
 import ChangeCardVariationModal from "../ChangeCardVariationModal";
+import CustomArtModal from "../CustomArtModal";
 
 type DeckCardItemProps = {
   card: CardEntity;
   quantity: number;
   tokens?: CardEntity[];
+  customImageUri?: string;
   onIncreaseQuantity: () => void;
   onDecreaseQuantity: () => void;
   onChangeCard: (newCard: CardEntity) => void;
   onChangeToken?: (tokenIndex: number, newToken: CardEntity) => void;
   onSetAsCover?: () => void;
+  onSetCustomArt?: (imageUri: string) => void;
+  onRemoveCustomArt?: () => void;
   isCoverCard?: boolean;
   preferredSet?: { code: string; name: string } | null;
 };
@@ -20,15 +24,19 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
   card,
   quantity,
   tokens = [],
+  customImageUri,
   onIncreaseQuantity,
   onDecreaseQuantity,
   onChangeCard,
   onChangeToken,
   onSetAsCover,
+  onSetCustomArt,
+  onRemoveCustomArt,
   isCoverCard = false,
   preferredSet,
 }) => {
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
+  const [isCustomArtModalOpen, setIsCustomArtModalOpen] = useState(false);
   const [isTokensListOpen, setIsTokensListOpen] = useState(false);
   const [tokenToChange, setTokenToChange] = useState<{ token: CardEntity; index: number } | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -71,11 +79,33 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
         />
       )}
 
+      {isCustomArtModalOpen && onSetCustomArt && onRemoveCustomArt && (
+        <CustomArtModal
+          card={card}
+          currentCustomArt={customImageUri}
+          close={() => setIsCustomArtModalOpen(false)}
+          onSetCustomArt={onSetCustomArt}
+          onRemoveCustomArt={onRemoveCustomArt}
+        />
+      )}
+
       <div key={card.id} className="relative cursor-pointer group">
-        <CardItem card={card} isFlipped={isFlipped} onFlipChange={setIsFlipped} />
+        <CardItem card={card} isFlipped={isFlipped} onFlipChange={setIsFlipped} customImageUri={customImageUri} />
 
         {/* Badges no canto superior direito - sempre visíveis */}
         <div className="absolute top-0.5 right-0.5 flex items-center gap-0.5 z-[5]">
+          {/* Indicador de arte customizada */}
+          {customImageUri && (
+            <div
+              className="bg-gradient-to-br from-pink-500 to-rose-600 
+                         text-white w-4 h-4 rounded-full 
+                         flex items-center justify-center shadow-md border border-white"
+              title="Arte customizada"
+            >
+              <span className="text-[8px]">🎨</span>
+            </div>
+          )}
+          
           {/* Indicador de carta de capa */}
           {isCoverCard && (
             <div
@@ -327,6 +357,27 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
               >
                 <span className="text-[10px]">⭐</span>
                 Capa
+              </button>
+            )}
+
+            {/* Botão arte customizada */}
+            {onSetCustomArt && onRemoveCustomArt && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCustomArtModalOpen(true);
+                }}
+                className={`px-2 py-1.5 text-xs font-medium rounded-md shadow-lg 
+                           hover:scale-105 transform transition-all duration-150
+                           flex items-center gap-1 justify-center ${
+                             customImageUri
+                               ? "bg-pink-600/90 text-white border border-pink-400/50 hover:bg-pink-500"
+                               : "bg-slate-600/90 text-slate-200 border border-slate-500 hover:bg-slate-500"
+                           }`}
+                title={customImageUri ? "Editar arte customizada" : "Adicionar arte customizada"}
+              >
+                <span className="text-[10px]">🎨</span>
+                Arte
               </button>
             )}
           </div>

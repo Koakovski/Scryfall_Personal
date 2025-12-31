@@ -160,7 +160,8 @@ export async function downloadDeckAsZip(
   for (const deckCards of cardGroups.values()) {
     for (const deckCard of deckCards) {
       totalImages++; // Imagem principal
-      if (deckCard.card.isDoubleFaced) {
+      // Só conta o verso se for double-faced E não tiver arte customizada
+      if (deckCard.card.isDoubleFaced && !deckCard.customImageUri) {
         totalImages++; // Verso da carta
       }
     }
@@ -189,18 +190,20 @@ export async function downloadDeckAsZip(
         currentCard: card.name,
       });
 
-      // Baixa a imagem principal da carta
+      // Baixa a imagem principal da carta (usa customizada se disponível)
       try {
         const fileName = generateFileName(cardName, {
           versionNumber: hasMultipleVersions ? i + 1 : undefined,
         });
 
-        const imageBlob = await fetchImageAsBlob(card.normalImageUri);
+        // Usa arte customizada se disponível, senão usa a original
+        const imageUri = deckCard.customImageUri ?? card.normalImageUri;
+        const imageBlob = await fetchImageAsBlob(imageUri);
         zip.file(fileName, imageBlob);
         downloadedImages++;
 
-        // Se for double-faced, baixa o verso também
-        if (card.isDoubleFaced && card.backImageUri) {
+        // Se for double-faced e NÃO tiver arte customizada, baixa o verso também
+        if (card.isDoubleFaced && card.backImageUri && !deckCard.customImageUri) {
           currentImage++;
           onProgress?.({
             current: currentImage,

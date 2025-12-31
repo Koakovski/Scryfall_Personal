@@ -196,6 +196,20 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     saveDeck(updatedCardsList);
   };
 
+  const onSetCustomArt = (cardIndex: number, imageUri: string) => {
+    const updatedCardsList = [...cards];
+    updatedCardsList[cardIndex] = cards[cardIndex].withCustomArt(imageUri);
+    setCards(updatedCardsList);
+    saveDeck(updatedCardsList);
+  };
+
+  const onRemoveCustomArt = (cardIndex: number) => {
+    const updatedCardsList = [...cards];
+    updatedCardsList[cardIndex] = cards[cardIndex].removeCustomArt();
+    setCards(updatedCardsList);
+    saveDeck(updatedCardsList);
+  };
+
   const handleSetAsCover = (cardId: string) => {
     const updatedDeck = DeckEntity.fromData({
       ...deck.toData(),
@@ -610,11 +624,14 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                           card={deckCard.card}
                           quantity={deckCard.quantity}
                           tokens={deckCard.tokens}
+                          customImageUri={deckCard.customImageUri}
                           onIncreaseQuantity={() => onIncreaseQuantity(originalIndex)}
                           onDecreaseQuantity={() => onDecreaseQuantity(originalIndex)}
                           onChangeCard={(newCard) => onChangeCard(originalIndex, newCard)}
                           onChangeToken={(tokenIndex, newToken) => onChangeToken(originalIndex, tokenIndex, newToken)}
                           onSetAsCover={() => handleSetAsCover(deckCard.cardId)}
+                          onSetCustomArt={(imageUri) => onSetCustomArt(originalIndex, imageUri)}
+                          onRemoveCustomArt={() => onRemoveCustomArt(originalIndex)}
                           isCoverCard={deck.coverCardId === deckCard.cardId}
                           preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
                         />

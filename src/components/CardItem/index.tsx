@@ -7,15 +7,21 @@ type CardItemProps = {
   isFlipped?: boolean;
   /** Callback quando o estado de flip muda */
   onFlipChange?: (isFlipped: boolean) => void;
+  /** URL de imagem customizada (sobrescreve a arte original) */
+  customImageUri?: string;
 };
 
 const CardItem: FC<CardItemProps> = ({
   card,
   isFlipped: externalIsFlipped,
   onFlipChange,
+  customImageUri,
 }) => {
   const [internalIsFlipped, setInternalIsFlipped] = useState(false);
   const alt = `${card.name} (${card.setName} #${card.collectorNumber})`;
+  
+  // Usa a imagem customizada se disponível, senão usa a original
+  const displayImageUri = customImageUri ?? card.normalImageUri;
 
   // Usa controle externo se fornecido, senão usa interno
   const isFlipped = externalIsFlipped ?? internalIsFlipped;
@@ -30,12 +36,12 @@ const CardItem: FC<CardItemProps> = ({
     }
   };
 
-  // Carta simples (sem dupla face)
-  if (!card.isDoubleFaced) {
+  // Carta simples (sem dupla face) ou com arte customizada (customizada não suporta flip)
+  if (!card.isDoubleFaced || customImageUri) {
     return (
       <div className="w-full h-full flex flex-col items-center">
         <img
-          src={card.normalImageUri}
+          src={displayImageUri}
           alt={alt}
           className="w-full h-auto rounded-lg"
         />

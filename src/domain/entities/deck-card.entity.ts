@@ -4,6 +4,8 @@ export interface DeckCardData {
   card: CardData;
   quantity: number;
   tokens?: CardData[];
+  /** URL da arte customizada (upload do usuário ou URL externa) */
+  customImageUri?: string;
 }
 
 export class DeckCardEntity {
@@ -43,6 +45,16 @@ export class DeckCardEntity {
 
   get tokens(): CardEntity[] {
     return this.data.tokens?.map((t) => CardEntity.fromData(t)) ?? [];
+  }
+
+  /** Retorna a URL da arte customizada, se houver */
+  get customImageUri(): string | undefined {
+    return this.data.customImageUri;
+  }
+
+  /** Retorna a URL da imagem a ser exibida (customizada ou original) */
+  get displayImageUri(): string {
+    return this.data.customImageUri ?? this.card.normalImageUri;
   }
 
   increaseQuantity(amount: number = 1): DeckCardEntity {
@@ -105,11 +117,33 @@ export class DeckCardEntity {
     });
   }
 
+  /**
+   * Define uma arte customizada para a carta
+   * @param imageUri URL da imagem customizada (pode ser data URL de upload ou URL externa)
+   */
+  withCustomArt(imageUri: string): DeckCardEntity {
+    return new DeckCardEntity({
+      ...this.data,
+      customImageUri: imageUri,
+    });
+  }
+
+  /**
+   * Remove a arte customizada, voltando à arte original
+   */
+  removeCustomArt(): DeckCardEntity {
+    return new DeckCardEntity({
+      ...this.data,
+      customImageUri: undefined,
+    });
+  }
+
   toData(): DeckCardData {
     return {
       card: { ...this.data.card },
       quantity: this.data.quantity,
       tokens: this.data.tokens?.map((t) => ({ ...t })),
+      customImageUri: this.data.customImageUri,
     };
   }
 }

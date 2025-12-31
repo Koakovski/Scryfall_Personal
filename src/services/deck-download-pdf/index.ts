@@ -335,7 +335,10 @@ export async function downloadDeckAsPdf(
       try {
         let dataUrl: string;
 
-        if (card.isDoubleFaced && card.backImageUri) {
+        // Se tiver arte customizada, usa ela (ignora double-faced)
+        if (deckCard.customImageUri) {
+          dataUrl = await loadImageAsBase64(deckCard.customImageUri, rotate90);
+        } else if (card.isDoubleFaced && card.backImageUri) {
           // Para cartas double-faced, combina frente e verso lado a lado
           dataUrl = await loadDoubleFacedImageAsBase64(
             card.normalImageUri,
