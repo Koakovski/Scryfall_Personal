@@ -350,14 +350,43 @@ export async function downloadDeckAsPdf(
 
         if (card.isDoubleFaced && card.backImageUri) {
           // Para cartas double-faced, combina frente e verso lado a lado
-          // Usa artes customizadas se disponíveis
-          const frontUri = deckCard.customImageUri ?? card.normalImageUri;
-          const backUri = deckCard.customBackImageUri ?? card.backImageUri;
+          // Usa artes customizadas se disponíveis, com fallback para originais
+          let frontUri = card.normalImageUri;
+          let backUri = card.backImageUri;
+          
+          // Tenta usar arte customizada da frente
+          if (deckCard.customImageUri) {
+            try {
+              await loadImageAsBase64(deckCard.customImageUri, false); // Teste de carregamento
+              frontUri = deckCard.customImageUri;
+            } catch (customError) {
+              console.warn(`Arte customizada da frente falhou para ${card.name}, usando original:`, customError);
+            }
+          }
+          
+          // Tenta usar arte customizada do verso
+          if (deckCard.customBackImageUri) {
+            try {
+              await loadImageAsBase64(deckCard.customBackImageUri, false); // Teste de carregamento
+              backUri = deckCard.customBackImageUri;
+            } catch (customError) {
+              console.warn(`Arte customizada do verso falhou para ${card.name}, usando original:`, customError);
+            }
+          }
+          
           dataUrl = await loadDoubleFacedImageAsBase64(frontUri, backUri, rotate90);
         } else {
           // Para cartas normais, carrega apenas a frente (usa arte customizada se disponível)
-          const imageUri = deckCard.customImageUri ?? card.normalImageUri;
-          dataUrl = await loadImageAsBase64(imageUri, rotate90);
+          if (deckCard.customImageUri) {
+            try {
+              dataUrl = await loadImageAsBase64(deckCard.customImageUri, rotate90);
+            } catch (customError) {
+              console.warn(`Arte customizada falhou para ${card.name}, usando original:`, customError);
+              dataUrl = await loadImageAsBase64(card.normalImageUri, rotate90);
+            }
+          } else {
+            dataUrl = await loadImageAsBase64(card.normalImageUri, rotate90);
+          }
         }
 
         cardImages.push({
@@ -385,9 +414,20 @@ export async function downloadDeckAsPdf(
       });
 
       try {
-        // Usa arte customizada se disponível, senão usa a original
-        const imageUri = tokenWithCustomArt.customImageUri ?? token.normalImageUri;
-        const dataUrl = await loadImageAsBase64(imageUri, rotate90);
+        let dataUrl: string;
+        
+        // Tenta usar arte customizada, com fallback para original
+        if (tokenWithCustomArt.customImageUri) {
+          try {
+            dataUrl = await loadImageAsBase64(tokenWithCustomArt.customImageUri, rotate90);
+          } catch (customError) {
+            console.warn(`Arte customizada falhou para token ${token.name}, usando original:`, customError);
+            dataUrl = await loadImageAsBase64(token.normalImageUri, rotate90);
+          }
+        } else {
+          dataUrl = await loadImageAsBase64(token.normalImageUri, rotate90);
+        }
+        
         cardImages.push({
           dataUrl,
           quantity: 1, // Tokens sempre 1 cópia

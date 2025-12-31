@@ -203,15 +203,26 @@ export async function downloadDeckAsZip(
         currentCard: card.name,
       });
 
-      // Baixa a imagem principal da carta (usa customizada se disponível)
+      // Baixa a imagem principal da carta (usa customizada se disponível, com fallback para original)
       try {
         const fileName = generateFileName(cardName, {
           versionNumber: hasMultipleVersions ? i + 1 : undefined,
         });
 
-        // Usa arte customizada da frente se disponível, senão usa a original
-        const imageUri = deckCard.customImageUri ?? card.normalImageUri;
-        const imageBlob = await fetchImageAsBlob(imageUri);
+        let imageBlob: Blob;
+        
+        // Tenta usar arte customizada, com fallback para original
+        if (deckCard.customImageUri) {
+          try {
+            imageBlob = await fetchImageAsBlob(deckCard.customImageUri);
+          } catch (customError) {
+            console.warn(`Arte customizada falhou para ${card.name}, usando original:`, customError);
+            imageBlob = await fetchImageAsBlob(card.normalImageUri);
+          }
+        } else {
+          imageBlob = await fetchImageAsBlob(card.normalImageUri);
+        }
+        
         zip.file(fileName, imageBlob);
         downloadedImages++;
 
@@ -229,9 +240,20 @@ export async function downloadDeckAsZip(
             isBackFace: true,
           });
 
-          // Usa arte customizada do verso se disponível, senão usa a original
-          const backImageUri = deckCard.customBackImageUri ?? card.backImageUri;
-          const backImageBlob = await fetchImageAsBlob(backImageUri);
+          let backImageBlob: Blob;
+          
+          // Tenta usar arte customizada do verso, com fallback para original
+          if (deckCard.customBackImageUri) {
+            try {
+              backImageBlob = await fetchImageAsBlob(deckCard.customBackImageUri);
+            } catch (customError) {
+              console.warn(`Arte customizada do verso falhou para ${card.name}, usando original:`, customError);
+              backImageBlob = await fetchImageAsBlob(card.backImageUri);
+            }
+          } else {
+            backImageBlob = await fetchImageAsBlob(card.backImageUri);
+          }
+          
           zip.file(backFileName, backImageBlob);
           downloadedImages++;
         }
@@ -264,9 +286,20 @@ export async function downloadDeckAsZip(
           versionNumber: hasMultipleVersions ? i + 1 : undefined,
         });
 
-        // Usa arte customizada se disponível, senão usa a original
-        const imageUri = tokenWithCustomArt.customImageUri ?? token.normalImageUri;
-        const imageBlob = await fetchImageAsBlob(imageUri);
+        let imageBlob: Blob;
+        
+        // Tenta usar arte customizada, com fallback para original
+        if (tokenWithCustomArt.customImageUri) {
+          try {
+            imageBlob = await fetchImageAsBlob(tokenWithCustomArt.customImageUri);
+          } catch (customError) {
+            console.warn(`Arte customizada falhou para token ${token.name}, usando original:`, customError);
+            imageBlob = await fetchImageAsBlob(token.normalImageUri);
+          }
+        } else {
+          imageBlob = await fetchImageAsBlob(token.normalImageUri);
+        }
+        
         zip.file(fileName, imageBlob);
         downloadedImages++;
       } catch (error) {
