@@ -4,7 +4,7 @@ import { Card } from "../../types/card";
 
 /**
  * Busca uma carta pelo nome exato em uma coleção específica
- * Se a carta não for encontrada na coleção, retorna null
+ * Se a carta não for encontrada na coleção, retorna erro
  */
 export const getCardByNameAndSetService = async (
   name: string,
@@ -14,15 +14,20 @@ export const getCardByNameAndSetService = async (
     ScryfallEndPoint.namedCard(),
     {
       params: {
-        fuzzy: name,
+        exact: name,
         set: setCode.toLowerCase(),
       },
     }
   );
 
+  // Verificação extra: garante que o nome retornado é exatamente igual ao buscado
+  // (ignora case, pois a API pode retornar com capitalização diferente)
+  if (result.success && result.data.name.toLowerCase() !== name.toLowerCase()) {
+    return {
+      success: false as const,
+      error: new Error(`Card name mismatch: expected "${name}", got "${result.data.name}"`),
+    };
+  }
+
   return result;
 };
-
-
-
-
