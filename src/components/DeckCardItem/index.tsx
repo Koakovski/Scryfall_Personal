@@ -158,16 +158,18 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
         />
 
         {/* Badges no canto superior direito - sempre visíveis */}
-        <div className="absolute top-0.5 right-0.5 flex items-center gap-0.5 z-[5]">
+        <div className="absolute top-1 right-1 flex items-center gap-1 z-[5]">
           {/* Indicador de arte customizada (qualquer tipo) */}
           {hasAnyCustomArt && (
             <div
               className="bg-gradient-to-br from-pink-500 to-rose-600 
-                         text-white w-4 h-4 rounded-full 
-                         flex items-center justify-center shadow-md border border-white"
+                         text-white w-5 h-5 rounded-full 
+                         flex items-center justify-center shadow-md border border-white/80"
               title={`Arte customizada${customImageUri ? " (frente)" : ""}${customBackImageUri ? " (verso)" : ""}${tokensData.some(t => t.customImageUri) ? " (tokens)" : ""}`}
             >
-              <span className="text-[8px]">🎨</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
+              </svg>
             </div>
           )}
           
@@ -175,11 +177,13 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
           {isCoverCard && (
             <div
               className="bg-gradient-to-br from-emerald-500 to-teal-600 
-                         text-white w-4 h-4 rounded-full 
-                         flex items-center justify-center shadow-md border border-white"
+                         text-white w-5 h-5 rounded-full 
+                         flex items-center justify-center shadow-md border border-white/80"
               title="Carta de capa do deck"
             >
-              <span className="text-[8px]">⭐</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
             </div>
           )}
 
@@ -191,22 +195,13 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                 setIsFlipped(!isFlipped);
               }}
               className="bg-gradient-to-br from-indigo-500 to-violet-600 
-                         text-white w-4 h-4 rounded-full 
-                         flex items-center justify-center shadow-md border border-white
+                         text-white w-5 h-5 rounded-full 
+                         flex items-center justify-center shadow-md border border-white/80
                          hover:from-indigo-400 hover:to-violet-500 transition-all"
               title={isFlipped ? "Ver frente" : "Ver verso"}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-2.5 w-2.5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                  clipRule="evenodd"
-                />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
               </svg>
             </button>
           )}
@@ -214,8 +209,8 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
           {/* Badge de quantidade */}
           <div
             className="bg-gradient-to-br from-amber-500 to-orange-600 
-                       text-white font-bold text-[10px] w-4 h-4 rounded-full 
-                       flex items-center justify-center shadow-md border border-white"
+                       text-white font-bold text-[10px] min-w-5 h-5 px-1 rounded-full 
+                       flex items-center justify-center shadow-md border border-white/80"
           >
             {quantity}
           </div>
@@ -223,19 +218,21 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
 
         {/* Badge de tokens - mostra quantidade de tokens */}
         {tokens.length > 0 && (
-          <div className="absolute top-0.5 left-0.5 z-[5]">
+          <div className="absolute top-1 left-1 z-[5]">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsTokensListOpen(!isTokensListOpen);
               }}
               className="bg-gradient-to-br from-purple-500 to-fuchsia-600 
-                         text-white font-bold text-[10px] px-1 py-0.5 rounded-full 
-                         flex items-center gap-0.5 shadow-md border border-white
+                         text-white font-bold text-[10px] h-5 px-1.5 rounded-full 
+                         flex items-center gap-1 shadow-md border border-white/80
                          hover:from-purple-400 hover:to-fuchsia-500 transition-all"
               title="Ver tokens"
             >
-              <span className="text-[8px]">🎭</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" />
+              </svg>
               <span>{tokens.length}</span>
             </button>
 
@@ -243,44 +240,52 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
             {isTokensListOpen && (
               <div
                 className="absolute top-full left-0 mt-1.5 bg-slate-900/95 backdrop-blur-sm 
-                           border border-slate-600 rounded-lg shadow-2xl p-2 z-[6]
-                           min-w-[160px] max-w-[220px]"
+                           border border-slate-600 rounded-lg shadow-2xl p-2.5 z-[6]
+                           min-w-[180px] max-w-[240px]"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center justify-between mb-1.5 pb-1.5 border-b border-slate-700">
-                  <h4 className="text-white font-semibold text-xs flex items-center gap-1">
-                    <span>🎭</span> Tokens
+                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-700">
+                  <h4 className="text-white font-semibold text-xs flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" />
+                    </svg>
+                    Tokens
                   </h4>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsTokensListOpen(false);
                     }}
-                    className="text-slate-400 hover:text-white transition-colors text-sm leading-none"
+                    className="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-white 
+                               hover:bg-slate-700 rounded transition-colors"
                   >
-                    ×
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
                   </button>
                 </div>
-                <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
+                <div className="flex flex-col gap-2 max-h-[240px] overflow-y-auto">
                   {tokens.map((token, index) => {
                     const tokenCustomArt = tokensData[index]?.customImageUri;
                     return (
                       <div
                         key={`${token.id}-${index}`}
-                        className="flex items-center gap-1.5 p-1.5 bg-slate-800/80 rounded-md 
+                        className="flex items-center gap-2 p-1.5 bg-slate-800/80 rounded-lg 
                                    hover:bg-slate-700/80 transition-colors group/token relative"
                       >
                         {/* Indicador de arte customizada no token */}
                         {tokenCustomArt && (
-                          <div className="absolute -top-1 -left-1 w-3 h-3 bg-pink-500 rounded-full 
-                                          flex items-center justify-center border border-white z-10">
-                            <span className="text-[6px]">🎨</span>
+                          <div className="absolute -top-1 -left-1 w-4 h-4 bg-gradient-to-br from-pink-500 to-rose-600 
+                                          rounded-full flex items-center justify-center border border-white/80 z-10 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2 text-white" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
+                            </svg>
                           </div>
                         )}
                         <img
                           src={getTokenDisplayUri(index)}
                           alt={token.name}
-                          className="w-10 h-auto rounded shadow-md"
+                          className="w-10 h-auto rounded shadow-md flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-xs font-medium truncate">
@@ -290,7 +295,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                             {token.setName}
                           </p>
                         </div>
-                        <div className="flex items-center gap-0.5 opacity-0 group-hover/token:opacity-100 transition-all">
+                        <div className="flex items-center gap-1 opacity-0 group-hover/token:opacity-100 transition-all">
                           {/* Botão de arte customizada do token */}
                           {onSetTokenCustomArt && onRemoveTokenCustomArt && (
                             <button
@@ -305,14 +310,16 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                                 });
                                 setIsTokensListOpen(false);
                               }}
-                              className={`p-1 text-white rounded transition-all ${
+                              className={`w-6 h-6 flex items-center justify-center text-white rounded-md transition-all ${
                                 tokenCustomArt 
-                                  ? "bg-pink-500/80 hover:bg-pink-500" 
-                                  : "bg-slate-500/80 hover:bg-slate-500"
+                                  ? "bg-pink-500/90 hover:bg-pink-500" 
+                                  : "bg-slate-600/90 hover:bg-slate-500"
                               }`}
                               title={tokenCustomArt ? "Editar arte customizada" : "Adicionar arte customizada"}
                             >
-                              <span className="text-[10px]">🎨</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
+                              </svg>
                             </button>
                           )}
                           {onChangeToken && (
@@ -322,21 +329,12 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                                 setTokenToChange({ token, index });
                                 setIsTokensListOpen(false);
                               }}
-                              className="p-1 bg-purple-500/80 text-white rounded 
-                                         hover:bg-purple-500 transition-all"
+                              className="w-6 h-6 flex items-center justify-center bg-purple-500/90 text-white 
+                                         rounded-md hover:bg-purple-500 transition-all"
                               title="Trocar versão do token"
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-3 w-3"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                                  clipRule="evenodd"
-                                />
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
                               </svg>
                             </button>
                           )}
@@ -396,7 +394,7 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
           </div>
 
           {/* Botões de ação */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap justify-center">
             {/* Botão flip para cartas double-faced */}
             {card.isDoubleFaced && (
               <button
@@ -404,43 +402,29 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                   e.stopPropagation();
                   setIsFlipped(!isFlipped);
                 }}
-                className="px-2 py-1.5 bg-indigo-600/90 text-white text-xs font-medium rounded-md shadow-lg 
+                className="h-7 px-2.5 bg-indigo-600/90 text-white text-xs font-medium rounded-md shadow-lg 
                            hover:bg-indigo-500 hover:scale-105 transform transition-all duration-150
-                           flex items-center gap-1 justify-center border border-indigo-400/50"
+                           flex items-center gap-1.5 justify-center border border-indigo-400/50"
                 title={isFlipped ? "Ver frente" : "Ver verso"}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3 w-3"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                    clipRule="evenodd"
-                  />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
                 </svg>
-                Virar
+                <span>Virar</span>
               </button>
             )}
 
             {/* Botão trocar versão */}
             <button
               onClick={handleChangeVersion}
-              className="px-2 py-1.5 bg-slate-700/90 text-slate-200 text-xs font-medium rounded-md shadow-lg 
+              className="h-7 px-2.5 bg-slate-700/90 text-slate-200 text-xs font-medium rounded-md shadow-lg 
                          hover:bg-slate-600 hover:scale-105 transform transition-all duration-150
-                         flex items-center gap-1 justify-center border border-slate-600"
+                         flex items-center gap-1.5 justify-center border border-slate-600"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
               </svg>
-              Versão
+              <span>Versão</span>
             </button>
 
             {/* Botão definir como capa */}
@@ -450,13 +434,15 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                   e.stopPropagation();
                   onSetAsCover();
                 }}
-                className="px-2 py-1.5 bg-emerald-600/90 text-white text-xs font-medium rounded-md shadow-lg 
+                className="h-7 px-2.5 bg-emerald-600/90 text-white text-xs font-medium rounded-md shadow-lg 
                            hover:bg-emerald-500 hover:scale-105 transform transition-all duration-150
-                           flex items-center gap-1 justify-center border border-emerald-400/50"
+                           flex items-center gap-1.5 justify-center border border-emerald-400/50"
                 title="Definir como capa do deck"
               >
-                <span className="text-[10px]">⭐</span>
-                Capa
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span>Capa</span>
               </button>
             )}
 
@@ -471,17 +457,19 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                     currentCustomArt: customImageUri,
                   });
                 }}
-                className={`px-2 py-1.5 text-xs font-medium rounded-md shadow-lg 
+                className={`h-7 px-2.5 text-xs font-medium rounded-md shadow-lg 
                            hover:scale-105 transform transition-all duration-150
-                           flex items-center gap-1 justify-center ${
+                           flex items-center gap-1.5 justify-center ${
                              customImageUri
                                ? "bg-pink-600/90 text-white border border-pink-400/50 hover:bg-pink-500"
                                : "bg-slate-600/90 text-slate-200 border border-slate-500 hover:bg-slate-500"
                            }`}
                 title={customImageUri ? "Editar arte customizada" : "Adicionar arte customizada"}
               >
-                <span className="text-[10px]">🎨</span>
-                Arte
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
+                </svg>
+                <span>Arte</span>
               </button>
             )}
 
@@ -496,17 +484,19 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                     currentCustomArt: customBackImageUri,
                   });
                 }}
-                className={`px-2 py-1.5 text-xs font-medium rounded-md shadow-lg 
+                className={`h-7 px-2.5 text-xs font-medium rounded-md shadow-lg 
                            hover:scale-105 transform transition-all duration-150
-                           flex items-center gap-1 justify-center ${
+                           flex items-center gap-1.5 justify-center ${
                              customBackImageUri
                                ? "bg-pink-600/90 text-white border border-pink-400/50 hover:bg-pink-500"
                                : "bg-slate-600/90 text-slate-200 border border-slate-500 hover:bg-slate-500"
                            }`}
                 title={customBackImageUri ? "Editar arte do verso" : "Adicionar arte do verso"}
               >
-                <span className="text-[10px]">🔄</span>
-                Arte Verso
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
+                </svg>
+                <span>Verso</span>
               </button>
             )}
           </div>
