@@ -210,6 +210,34 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     saveDeck(updatedCardsList);
   };
 
+  const onSetCustomBackArt = (cardIndex: number, imageUri: string) => {
+    const updatedCardsList = [...cards];
+    updatedCardsList[cardIndex] = cards[cardIndex].withCustomBackArt(imageUri);
+    setCards(updatedCardsList);
+    saveDeck(updatedCardsList);
+  };
+
+  const onRemoveCustomBackArt = (cardIndex: number) => {
+    const updatedCardsList = [...cards];
+    updatedCardsList[cardIndex] = cards[cardIndex].removeCustomBackArt();
+    setCards(updatedCardsList);
+    saveDeck(updatedCardsList);
+  };
+
+  const onSetTokenCustomArt = (cardIndex: number, tokenIndex: number, imageUri: string) => {
+    const updatedCardsList = [...cards];
+    updatedCardsList[cardIndex] = cards[cardIndex].withTokenCustomArt(tokenIndex, imageUri);
+    setCards(updatedCardsList);
+    saveDeck(updatedCardsList);
+  };
+
+  const onRemoveTokenCustomArt = (cardIndex: number, tokenIndex: number) => {
+    const updatedCardsList = [...cards];
+    updatedCardsList[cardIndex] = cards[cardIndex].removeTokenCustomArt(tokenIndex);
+    setCards(updatedCardsList);
+    saveDeck(updatedCardsList);
+  };
+
   const handleSetAsCover = (cardId: string) => {
     const updatedDeck = DeckEntity.fromData({
       ...deck.toData(),
@@ -624,7 +652,9 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                           card={deckCard.card}
                           quantity={deckCard.quantity}
                           tokens={deckCard.tokens}
+                          tokensData={deckCard.tokensData}
                           customImageUri={deckCard.customImageUri}
+                          customBackImageUri={deckCard.customBackImageUri}
                           onIncreaseQuantity={() => onIncreaseQuantity(originalIndex)}
                           onDecreaseQuantity={() => onDecreaseQuantity(originalIndex)}
                           onChangeCard={(newCard) => onChangeCard(originalIndex, newCard)}
@@ -632,6 +662,10 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                           onSetAsCover={() => handleSetAsCover(deckCard.cardId)}
                           onSetCustomArt={(imageUri) => onSetCustomArt(originalIndex, imageUri)}
                           onRemoveCustomArt={() => onRemoveCustomArt(originalIndex)}
+                          onSetCustomBackArt={(imageUri) => onSetCustomBackArt(originalIndex, imageUri)}
+                          onRemoveCustomBackArt={() => onRemoveCustomBackArt(originalIndex)}
+                          onSetTokenCustomArt={(tokenIndex, imageUri) => onSetTokenCustomArt(originalIndex, tokenIndex, imageUri)}
+                          onRemoveTokenCustomArt={(tokenIndex) => onRemoveTokenCustomArt(originalIndex, tokenIndex)}
                           isCoverCard={deck.coverCardId === deckCard.cardId}
                           preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
                         />

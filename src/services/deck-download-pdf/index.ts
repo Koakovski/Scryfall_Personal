@@ -262,14 +262,20 @@ function groupCardsByName(
   return groups;
 }
 
+/** Token com possível arte customizada */
+interface TokenWithCustomArt {
+  card: CardEntity;
+  customImageUri?: string;
+}
+
 /**
  * Agrupa tokens por nome para identificar versões diferentes
  */
-function groupTokensByName(tokens: CardEntity[]): Map<string, CardEntity[]> {
-  const groups = new Map<string, CardEntity[]>();
+function groupTokensByName(tokens: TokenWithCustomArt[]): Map<string, TokenWithCustomArt[]> {
+  const groups = new Map<string, TokenWithCustomArt[]>();
 
   for (const token of tokens) {
-    const name = token.name;
+    const name = token.card.name;
     const existing = groups.get(name) || [];
     existing.push(token);
     groups.set(name, existing);
@@ -299,10 +305,17 @@ export async function downloadDeckAsPdf(
   // Agrupa cartas por nome para versões
   const cardGroups = groupCardsByName(cards);
 
-  // Coleta todos os tokens únicos
-  const allTokens: CardEntity[] = [];
+  // Coleta todos os tokens únicos com suas artes customizadas
+  const allTokens: TokenWithCustomArt[] = [];
   for (const deckCard of cards) {
-    allTokens.push(...deckCard.tokens);
+    const tokensData = deckCard.tokensData;
+    for (let i = 0; i < tokensData.length; i++) {
+      const tokenData = tokensData[i];
+      allTokens.push({
+        card: CardEntity.fromData(tokenData.card),
+        customImageUri: tokenData.customImageUri,
+      });
+    }
   }
   const tokenGroups = groupTokensByName(allTokens);
 
@@ -335,19 +348,16 @@ export async function downloadDeckAsPdf(
       try {
         let dataUrl: string;
 
-        // Se tiver arte customizada, usa ela (ignora double-faced)
-        if (deckCard.customImageUri) {
-          dataUrl = await loadImageAsBase64(deckCard.customImageUri, rotate90);
-        } else if (card.isDoubleFaced && card.backImageUri) {
+        if (card.isDoubleFaced && card.backImageUri) {
           // Para cartas double-faced, combina frente e verso lado a lado
-          dataUrl = await loadDoubleFacedImageAsBase64(
-            card.normalImageUri,
-            card.backImageUri,
-            rotate90
-          );
+          // Usa artes customizadas se disponíveis
+          const frontUri = deckCard.customImageUri ?? card.normalImageUri;
+          const backUri = deckCard.customBackImageUri ?? card.backImageUri;
+          dataUrl = await loadDoubleFacedImageAsBase64(frontUri, backUri, rotate90);
         } else {
-          // Para cartas normais, carrega apenas a frente
-          dataUrl = await loadImageAsBase64(card.normalImageUri, rotate90);
+          // Para cartas normais, carrega apenas a frente (usa arte customizada se disponível)
+          const imageUri = deckCard.customImageUri ?? card.normalImageUri;
+          dataUrl = await loadImageAsBase64(imageUri, rotate90);
         }
 
         cardImages.push({
@@ -364,7 +374,8 @@ export async function downloadDeckAsPdf(
 
   // Processa os tokens
   for (const [, tokens] of tokenGroups) {
-    for (const token of tokens) {
+    for (const tokenWithCustomArt of tokens) {
+      const token = tokenWithCustomArt.card;
       // Atualiza progresso
       currentImage++;
       onProgress?.({
@@ -374,7 +385,9 @@ export async function downloadDeckAsPdf(
       });
 
       try {
-        const dataUrl = await loadImageAsBase64(token.normalImageUri, rotate90);
+        // Usa arte customizada se disponível, senão usa a original
+        const imageUri = tokenWithCustomArt.customImageUri ?? token.normalImageUri;
+        const dataUrl = await loadImageAsBase64(imageUri, rotate90);
         cardImages.push({
           dataUrl,
           quantity: 1, // Tokens sempre 1 cópia

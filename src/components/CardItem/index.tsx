@@ -7,8 +7,10 @@ type CardItemProps = {
   isFlipped?: boolean;
   /** Callback quando o estado de flip muda */
   onFlipChange?: (isFlipped: boolean) => void;
-  /** URL de imagem customizada (sobrescreve a arte original) */
+  /** URL de imagem customizada da frente (sobrescreve a arte original) */
   customImageUri?: string;
+  /** URL de imagem customizada do verso (para cartas double-faced) */
+  customBackImageUri?: string;
 };
 
 const CardItem: FC<CardItemProps> = ({
@@ -16,12 +18,14 @@ const CardItem: FC<CardItemProps> = ({
   isFlipped: externalIsFlipped,
   onFlipChange,
   customImageUri,
+  customBackImageUri,
 }) => {
   const [internalIsFlipped, setInternalIsFlipped] = useState(false);
   const alt = `${card.name} (${card.setName} #${card.collectorNumber})`;
   
   // Usa a imagem customizada se disponível, senão usa a original
-  const displayImageUri = customImageUri ?? card.normalImageUri;
+  const displayFrontImageUri = customImageUri ?? card.normalImageUri;
+  const displayBackImageUri = customBackImageUri ?? card.backImageUri;
 
   // Usa controle externo se fornecido, senão usa interno
   const isFlipped = externalIsFlipped ?? internalIsFlipped;
@@ -36,12 +40,12 @@ const CardItem: FC<CardItemProps> = ({
     }
   };
 
-  // Carta simples (sem dupla face) ou com arte customizada (customizada não suporta flip)
-  if (!card.isDoubleFaced || customImageUri) {
+  // Carta simples (sem dupla face)
+  if (!card.isDoubleFaced) {
     return (
       <div className="w-full h-full flex flex-col items-center">
         <img
-          src={displayImageUri}
+          src={displayFrontImageUri}
           alt={alt}
           className="w-full h-auto rounded-lg"
         />
@@ -49,7 +53,7 @@ const CardItem: FC<CardItemProps> = ({
     );
   }
 
-  // Carta double-faced com flip animation
+  // Carta double-faced com flip animation (suporta artes customizadas para frente e verso)
   return (
     <div className="w-full h-full flex flex-col items-center relative group/card">
       {/* Container 3D para flip */}
@@ -66,9 +70,9 @@ const CardItem: FC<CardItemProps> = ({
             transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
           }}
         >
-          {/* Face frontal */}
+          {/* Face frontal (usa arte customizada se disponível) */}
           <img
-            src={card.normalImageUri}
+            src={displayFrontImageUri}
             alt={`${alt} - Frente`}
             className="w-full h-auto rounded-lg"
             style={{
@@ -76,9 +80,9 @@ const CardItem: FC<CardItemProps> = ({
             }}
           />
 
-          {/* Face traseira */}
+          {/* Face traseira (usa arte customizada se disponível) */}
           <img
-            src={card.backImageUri}
+            src={displayBackImageUri}
             alt={`${alt} - Verso`}
             className="w-full h-auto rounded-lg absolute top-0 left-0"
             style={{

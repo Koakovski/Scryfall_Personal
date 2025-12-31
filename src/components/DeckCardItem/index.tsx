@@ -1,14 +1,24 @@
 import { FC, useState } from "react";
 import { CardEntity } from "../../domain/entities/card.entity";
+import { TokenData } from "../../domain/entities/deck-card.entity";
 import CardItem from "../CardItem";
 import ChangeCardVariationModal from "../ChangeCardVariationModal";
-import CustomArtModal from "../CustomArtModal";
+import CustomArtModal, { CustomArtType } from "../CustomArtModal";
+
+/** Dados de um token com arte customizada para exibição */
+export interface TokenDisplayData {
+  card: CardEntity;
+  customImageUri?: string;
+}
 
 type DeckCardItemProps = {
   card: CardEntity;
   quantity: number;
   tokens?: CardEntity[];
+  /** Dados completos dos tokens com arte customizada */
+  tokensData?: TokenData[];
   customImageUri?: string;
+  customBackImageUri?: string;
   onIncreaseQuantity: () => void;
   onDecreaseQuantity: () => void;
   onChangeCard: (newCard: CardEntity) => void;
@@ -16,15 +26,29 @@ type DeckCardItemProps = {
   onSetAsCover?: () => void;
   onSetCustomArt?: (imageUri: string) => void;
   onRemoveCustomArt?: () => void;
+  onSetCustomBackArt?: (imageUri: string) => void;
+  onRemoveCustomBackArt?: () => void;
+  onSetTokenCustomArt?: (tokenIndex: number, imageUri: string) => void;
+  onRemoveTokenCustomArt?: (tokenIndex: number) => void;
   isCoverCard?: boolean;
   preferredSet?: { code: string; name: string } | null;
 };
+
+type CustomArtModalState = {
+  type: CustomArtType;
+  tokenIndex?: number;
+  tokenName?: string;
+  originalImageUri: string;
+  currentCustomArt?: string;
+} | null;
 
 const DeckCardItem: FC<DeckCardItemProps> = ({
   card,
   quantity,
   tokens = [],
+  tokensData = [],
   customImageUri,
+  customBackImageUri,
   onIncreaseQuantity,
   onDecreaseQuantity,
   onChangeCard,
@@ -32,14 +56,28 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
   onSetAsCover,
   onSetCustomArt,
   onRemoveCustomArt,
+  onSetCustomBackArt,
+  onRemoveCustomBackArt,
+  onSetTokenCustomArt,
+  onRemoveTokenCustomArt,
   isCoverCard = false,
   preferredSet,
 }) => {
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
-  const [isCustomArtModalOpen, setIsCustomArtModalOpen] = useState(false);
+  const [customArtModal, setCustomArtModal] = useState<CustomArtModalState>(null);
   const [isTokensListOpen, setIsTokensListOpen] = useState(false);
   const [tokenToChange, setTokenToChange] = useState<{ token: CardEntity; index: number } | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
+
+  // Verifica se algum token tem arte customizada
+  const hasAnyCustomArt = customImageUri || customBackImageUri || tokensData.some(t => t.customImageUri);
+
+  // Obtém a imagem de exibição de um token (customizada ou original)
+  const getTokenDisplayUri = (index: number): string => {
+    const tokenData = tokensData[index];
+    if (tokenData?.customImageUri) return tokenData.customImageUri;
+    return tokens[index]?.normalImageUri ?? "";
+  };
 
   const handleIncrease = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -79,28 +117,55 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
         />
       )}
 
-      {isCustomArtModalOpen && onSetCustomArt && onRemoveCustomArt && (
+      {customArtModal && (
         <CustomArtModal
           card={card}
-          currentCustomArt={customImageUri}
-          close={() => setIsCustomArtModalOpen(false)}
-          onSetCustomArt={onSetCustomArt}
-          onRemoveCustomArt={onRemoveCustomArt}
+          originalImageUri={customArtModal.originalImageUri}
+          currentCustomArt={customArtModal.currentCustomArt}
+          artType={customArtModal.type}
+          tokenName={customArtModal.tokenName}
+          close={() => setCustomArtModal(null)}
+          onSetCustomArt={(imageUri) => {
+            if (customArtModal.type === "front" && onSetCustomArt) {
+              onSetCustomArt(imageUri);
+            } else if (customArtModal.type === "back" && onSetCustomBackArt) {
+              onSetCustomBackArt(imageUri);
+            } else if (customArtModal.type === "token" && onSetTokenCustomArt && customArtModal.tokenIndex !== undefined) {
+              onSetTokenCustomArt(customArtModal.tokenIndex, imageUri);
+            }
+            setCustomArtModal(null);
+          }}
+          onRemoveCustomArt={() => {
+            if (customArtModal.type === "front" && onRemoveCustomArt) {
+              onRemoveCustomArt();
+            } else if (customArtModal.type === "back" && onRemoveCustomBackArt) {
+              onRemoveCustomBackArt();
+            } else if (customArtModal.type === "token" && onRemoveTokenCustomArt && customArtModal.tokenIndex !== undefined) {
+              onRemoveTokenCustomArt(customArtModal.tokenIndex);
+            }
+            setCustomArtModal(null);
+          }}
         />
       )}
 
       <div key={card.id} className="relative cursor-pointer group">
-        <CardItem card={card} isFlipped={isFlipped} onFlipChange={setIsFlipped} customImageUri={customImageUri} />
+        <CardItem 
+          card={card} 
+          isFlipped={isFlipped} 
+          onFlipChange={setIsFlipped} 
+          customImageUri={customImageUri} 
+          customBackImageUri={customBackImageUri}
+        />
 
         {/* Badges no canto superior direito - sempre visíveis */}
         <div className="absolute top-0.5 right-0.5 flex items-center gap-0.5 z-[5]">
-          {/* Indicador de arte customizada */}
-          {customImageUri && (
+          {/* Indicador de arte customizada (qualquer tipo) */}
+          {hasAnyCustomArt && (
             <div
               className="bg-gradient-to-br from-pink-500 to-rose-600 
                          text-white w-4 h-4 rounded-full 
                          flex items-center justify-center shadow-md border border-white"
-              title="Arte customizada"
+              title={`Arte customizada${customImageUri ? " (frente)" : ""}${customBackImageUri ? " (verso)" : ""}${tokensData.some(t => t.customImageUri) ? " (tokens)" : ""}`}
             >
               <span className="text-[8px]">🎨</span>
             </div>
@@ -197,53 +262,88 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
                   </button>
                 </div>
                 <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
-                  {tokens.map((token, index) => (
-                    <div
-                      key={`${token.id}-${index}`}
-                      className="flex items-center gap-1.5 p-1.5 bg-slate-800/80 rounded-md 
-                                 hover:bg-slate-700/80 transition-colors group/token"
-                    >
-                      <img
-                        src={token.normalImageUri}
-                        alt={token.name}
-                        className="w-10 h-auto rounded shadow-md"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs font-medium truncate">
-                          {token.name}
-                        </p>
-                        <p className="text-slate-400 text-[10px] truncate">
-                          {token.setName}
-                        </p>
+                  {tokens.map((token, index) => {
+                    const tokenCustomArt = tokensData[index]?.customImageUri;
+                    return (
+                      <div
+                        key={`${token.id}-${index}`}
+                        className="flex items-center gap-1.5 p-1.5 bg-slate-800/80 rounded-md 
+                                   hover:bg-slate-700/80 transition-colors group/token relative"
+                      >
+                        {/* Indicador de arte customizada no token */}
+                        {tokenCustomArt && (
+                          <div className="absolute -top-1 -left-1 w-3 h-3 bg-pink-500 rounded-full 
+                                          flex items-center justify-center border border-white z-10">
+                            <span className="text-[6px]">🎨</span>
+                          </div>
+                        )}
+                        <img
+                          src={getTokenDisplayUri(index)}
+                          alt={token.name}
+                          className="w-10 h-auto rounded shadow-md"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-xs font-medium truncate">
+                            {token.name}
+                          </p>
+                          <p className="text-slate-400 text-[10px] truncate">
+                            {token.setName}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-0.5 opacity-0 group-hover/token:opacity-100 transition-all">
+                          {/* Botão de arte customizada do token */}
+                          {onSetTokenCustomArt && onRemoveTokenCustomArt && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCustomArtModal({
+                                  type: "token",
+                                  tokenIndex: index,
+                                  tokenName: token.name,
+                                  originalImageUri: token.normalImageUri,
+                                  currentCustomArt: tokenCustomArt,
+                                });
+                                setIsTokensListOpen(false);
+                              }}
+                              className={`p-1 text-white rounded transition-all ${
+                                tokenCustomArt 
+                                  ? "bg-pink-500/80 hover:bg-pink-500" 
+                                  : "bg-slate-500/80 hover:bg-slate-500"
+                              }`}
+                              title={tokenCustomArt ? "Editar arte customizada" : "Adicionar arte customizada"}
+                            >
+                              <span className="text-[10px]">🎨</span>
+                            </button>
+                          )}
+                          {onChangeToken && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTokenToChange({ token, index });
+                                setIsTokensListOpen(false);
+                              }}
+                              className="p-1 bg-purple-500/80 text-white rounded 
+                                         hover:bg-purple-500 transition-all"
+                              title="Trocar versão do token"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-3 w-3"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      {onChangeToken && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setTokenToChange({ token, index });
-                            setIsTokensListOpen(false);
-                          }}
-                          className="p-1 bg-purple-500/80 text-white rounded 
-                                     hover:bg-purple-500 transition-all opacity-0 
-                                     group-hover/token:opacity-100"
-                          title="Trocar versão do token"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -360,12 +460,16 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
               </button>
             )}
 
-            {/* Botão arte customizada */}
-            {onSetCustomArt && onRemoveCustomArt && (
+            {/* Botão arte customizada (frente) */}
+            {onSetCustomArt && onRemoveCustomArt && !isFlipped && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsCustomArtModalOpen(true);
+                  setCustomArtModal({
+                    type: "front",
+                    originalImageUri: card.normalImageUri,
+                    currentCustomArt: customImageUri,
+                  });
                 }}
                 className={`px-2 py-1.5 text-xs font-medium rounded-md shadow-lg 
                            hover:scale-105 transform transition-all duration-150
@@ -378,6 +482,31 @@ const DeckCardItem: FC<DeckCardItemProps> = ({
               >
                 <span className="text-[10px]">🎨</span>
                 Arte
+              </button>
+            )}
+
+            {/* Botão arte customizada (verso) - só aparece quando flipado */}
+            {card.isDoubleFaced && onSetCustomBackArt && onRemoveCustomBackArt && isFlipped && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCustomArtModal({
+                    type: "back",
+                    originalImageUri: card.backImageUri ?? "",
+                    currentCustomArt: customBackImageUri,
+                  });
+                }}
+                className={`px-2 py-1.5 text-xs font-medium rounded-md shadow-lg 
+                           hover:scale-105 transform transition-all duration-150
+                           flex items-center gap-1 justify-center ${
+                             customBackImageUri
+                               ? "bg-pink-600/90 text-white border border-pink-400/50 hover:bg-pink-500"
+                               : "bg-slate-600/90 text-slate-200 border border-slate-500 hover:bg-slate-500"
+                           }`}
+                title={customBackImageUri ? "Editar arte do verso" : "Adicionar arte do verso"}
+              >
+                <span className="text-[10px]">🔄</span>
+                Arte Verso
               </button>
             )}
           </div>

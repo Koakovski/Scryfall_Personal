@@ -119,14 +119,20 @@ function groupCardsByName(
   return groups;
 }
 
+/** Token com possível arte customizada */
+interface TokenWithCustomArt {
+  card: CardEntity;
+  customImageUri?: string;
+}
+
 /**
  * Agrupa tokens por nome para identificar versões diferentes
  */
-function groupTokensByName(tokens: CardEntity[]): Map<string, CardEntity[]> {
-  const groups = new Map<string, CardEntity[]>();
+function groupTokensByName(tokens: TokenWithCustomArt[]): Map<string, TokenWithCustomArt[]> {
+  const groups = new Map<string, TokenWithCustomArt[]>();
 
   for (const token of tokens) {
-    const name = token.name;
+    const name = token.card.name;
     const existing = groups.get(name) || [];
     existing.push(token);
     groups.set(name, existing);
@@ -148,10 +154,17 @@ export async function downloadDeckAsZip(
   // Agrupa cartas por nome para versões
   const cardGroups = groupCardsByName(cards);
 
-  // Coleta todos os tokens únicos
-  const allTokens: CardEntity[] = [];
+  // Coleta todos os tokens únicos com suas artes customizadas
+  const allTokens: TokenWithCustomArt[] = [];
   for (const deckCard of cards) {
-    allTokens.push(...deckCard.tokens);
+    const tokensData = deckCard.tokensData;
+    for (let i = 0; i < tokensData.length; i++) {
+      const tokenData = tokensData[i];
+      allTokens.push({
+        card: CardEntity.fromData(tokenData.card),
+        customImageUri: tokenData.customImageUri,
+      });
+    }
   }
   const tokenGroups = groupTokensByName(allTokens);
 
@@ -160,8 +173,8 @@ export async function downloadDeckAsZip(
   for (const deckCards of cardGroups.values()) {
     for (const deckCard of deckCards) {
       totalImages++; // Imagem principal
-      // Só conta o verso se for double-faced E não tiver arte customizada
-      if (deckCard.card.isDoubleFaced && !deckCard.customImageUri) {
+      // Sempre conta o verso para cartas double-faced
+      if (deckCard.card.isDoubleFaced) {
         totalImages++; // Verso da carta
       }
     }
@@ -196,14 +209,14 @@ export async function downloadDeckAsZip(
           versionNumber: hasMultipleVersions ? i + 1 : undefined,
         });
 
-        // Usa arte customizada se disponível, senão usa a original
+        // Usa arte customizada da frente se disponível, senão usa a original
         const imageUri = deckCard.customImageUri ?? card.normalImageUri;
         const imageBlob = await fetchImageAsBlob(imageUri);
         zip.file(fileName, imageBlob);
         downloadedImages++;
 
-        // Se for double-faced e NÃO tiver arte customizada, baixa o verso também
-        if (card.isDoubleFaced && card.backImageUri && !deckCard.customImageUri) {
+        // Sempre baixa o verso para cartas double-faced (com arte customizada ou original)
+        if (card.isDoubleFaced && card.backImageUri) {
           currentImage++;
           onProgress?.({
             current: currentImage,
@@ -216,7 +229,9 @@ export async function downloadDeckAsZip(
             isBackFace: true,
           });
 
-          const backImageBlob = await fetchImageAsBlob(card.backImageUri);
+          // Usa arte customizada do verso se disponível, senão usa a original
+          const backImageUri = deckCard.customBackImageUri ?? card.backImageUri;
+          const backImageBlob = await fetchImageAsBlob(backImageUri);
           zip.file(backFileName, backImageBlob);
           downloadedImages++;
         }
@@ -232,7 +247,8 @@ export async function downloadDeckAsZip(
     const hasMultipleVersions = tokens.length > 1;
 
     for (let i = 0; i < tokens.length; i++) {
-      const token = tokens[i];
+      const tokenWithCustomArt = tokens[i];
+      const token = tokenWithCustomArt.card;
 
       // Atualiza progresso
       currentImage++;
@@ -248,7 +264,9 @@ export async function downloadDeckAsZip(
           versionNumber: hasMultipleVersions ? i + 1 : undefined,
         });
 
-        const imageBlob = await fetchImageAsBlob(token.normalImageUri);
+        // Usa arte customizada se disponível, senão usa a original
+        const imageUri = tokenWithCustomArt.customImageUri ?? token.normalImageUri;
+        const imageBlob = await fetchImageAsBlob(imageUri);
         zip.file(fileName, imageBlob);
         downloadedImages++;
       } catch (error) {

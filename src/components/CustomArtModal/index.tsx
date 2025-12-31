@@ -1,9 +1,17 @@
 import { FC, useRef, useState } from "react";
 import { CardEntity } from "../../domain/entities/card.entity";
 
+export type CustomArtType = "front" | "back" | "token";
+
 type CustomArtModalProps = {
   card: CardEntity;
   currentCustomArt?: string;
+  /** URL da imagem original a ser comparada */
+  originalImageUri: string;
+  /** Tipo de arte sendo customizada */
+  artType?: CustomArtType;
+  /** Nome do token (se for token) */
+  tokenName?: string;
   close: () => void;
   onSetCustomArt: (imageUri: string) => void;
   onRemoveCustomArt: () => void;
@@ -11,9 +19,34 @@ type CustomArtModalProps = {
 
 type InputMode = "upload" | "url";
 
+const getArtTypeLabel = (artType: CustomArtType, tokenName?: string): string => {
+  switch (artType) {
+    case "front":
+      return "Frente";
+    case "back":
+      return "Verso";
+    case "token":
+      return tokenName ? `Token: ${tokenName}` : "Token";
+  }
+};
+
+const getArtTypeIcon = (artType: CustomArtType): string => {
+  switch (artType) {
+    case "front":
+      return "🎨";
+    case "back":
+      return "🔄";
+    case "token":
+      return "🎭";
+  }
+};
+
 const CustomArtModal: FC<CustomArtModalProps> = ({
   card,
   currentCustomArt,
+  originalImageUri,
+  artType = "front",
+  tokenName,
   close,
   onSetCustomArt,
   onRemoveCustomArt,
@@ -118,10 +151,14 @@ const CustomArtModal: FC<CustomArtModalProps> = ({
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-700 bg-slate-800/50">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span>🎨</span> Arte Customizada
+            <span>{getArtTypeIcon(artType)}</span> Arte Customizada - {getArtTypeLabel(artType, tokenName)}
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            Defina uma arte personalizada para <span className="text-amber-300">{card.name}</span>
+            Defina uma arte personalizada para{" "}
+            <span className="text-amber-300">
+              {artType === "token" && tokenName ? tokenName : card.name}
+              {artType === "back" && " (Verso)"}
+            </span>
           </p>
         </div>
 
@@ -136,8 +173,8 @@ const CustomArtModal: FC<CustomArtModalProps> = ({
               </label>
               <div className="relative aspect-[488/680] bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
                 <img
-                  src={card.normalImageUri}
-                  alt={`${card.name} - Original`}
+                  src={originalImageUri}
+                  alt={`${artType === "token" && tokenName ? tokenName : card.name} - Original`}
                   className="w-full h-full object-cover"
                 />
               </div>
