@@ -11,6 +11,7 @@ import { DeckEntity } from "../../domain/entities/deck.entity";
 import { deckStorageService } from "../../services/local-storage";
 import { downloadDeckAsZip } from "../../services/deck-download";
 import { downloadDeckAsPdf, PDF_FORMATS, PdfFormat } from "../../services/deck-download-pdf";
+import { copyDeckAsList, downloadDeckAsList } from "../../services/deck-export-list";
 
 /** Mapeamento de tipos para ícones e cores */
 const TYPE_CONFIG: Record<CardType, { icon: string; label: string; color: string }> = {
@@ -47,6 +48,8 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [showPdfFormatDropdown, setShowPdfFormatDropdown] = useState(false);
+  const [showListExportDropdown, setShowListExportDropdown] = useState(false);
+  const [listExportMessage, setListExportMessage] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState<{
     current: number;
     total: number;
@@ -266,6 +269,37 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     return Array.from(grouped.entries()).filter(([, cards]) => cards.length > 0);
   }, [cards]);
 
+  const handleCopyDeckList = async () => {
+    if (cards.length === 0) return;
+
+    try {
+      const currentDeck = DeckEntity.fromData({
+        ...deck.toData(),
+        cards: cards.map((c) => c.toData()),
+      });
+      await copyDeckAsList(currentDeck);
+      setListExportMessage("Lista copiada!");
+      setTimeout(() => setListExportMessage(null), 2000);
+    } catch {
+      setListExportMessage("Erro ao copiar lista");
+      setTimeout(() => setListExportMessage(null), 2000);
+    }
+    setShowListExportDropdown(false);
+  };
+
+  const handleDownloadDeckList = () => {
+    if (cards.length === 0) return;
+
+    const currentDeck = DeckEntity.fromData({
+      ...deck.toData(),
+      cards: cards.map((c) => c.toData()),
+    });
+    downloadDeckAsList(currentDeck);
+    setListExportMessage("Lista baixada!");
+    setTimeout(() => setListExportMessage(null), 2000);
+    setShowListExportDropdown(false);
+  };
+
   const handleDownloadDeck = async () => {
     if (cards.length === 0) return;
     
@@ -428,6 +462,64 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                   <span>📄</span>
                   JSON
                 </button>
+
+                {/* Botão de Exportar Lista */}
+                <div className="relative">
+                  <button
+                    onClick={() => cards.length > 0 && setShowListExportDropdown(!showListExportDropdown)}
+                    disabled={cards.length === 0}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                      cards.length === 0
+                        ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                        : "bg-purple-600/20 text-purple-300 border border-purple-500/40 hover:bg-purple-600/30"
+                    }`}
+                    title={cards.length === 0 ? "Adicione cartas para exportar" : "Exportar deck como lista de texto"}
+                  >
+                    <span>📋</span>
+                    Lista
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`h-3 w-3 transition-transform ${showListExportDropdown ? "rotate-180" : ""}`}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+
+                  {showListExportDropdown && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setShowListExportDropdown(false)}
+                      />
+                      <div className="absolute right-0 top-full mt-1.5 w-44 bg-slate-800 border border-slate-600 rounded-md shadow-xl z-20 overflow-hidden">
+                        <button
+                          onClick={handleCopyDeckList}
+                          className="w-full px-3 py-2 text-left hover:bg-slate-700 transition-colors cursor-pointer"
+                        >
+                          <span className="text-xs font-medium text-white">Copiar lista</span>
+                        </button>
+                        <button
+                          onClick={handleDownloadDeckList}
+                          className="w-full px-3 py-2 text-left hover:bg-slate-700 transition-colors cursor-pointer border-t border-slate-700"
+                        >
+                          <span className="text-xs font-medium text-white">Baixar .txt</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {listExportMessage && (
+                  <span className="text-[10px] text-purple-300 font-medium whitespace-nowrap">
+                    {listExportMessage}
+                  </span>
+                )}
 
                 {/* Botão de Download ZIP */}
                 <button

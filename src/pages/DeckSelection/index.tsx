@@ -2,6 +2,7 @@ import { FC, useEffect, useRef, useState } from "react";
 import { DeckEntity } from "../../domain/entities/deck.entity";
 import { PreferredSetEntity } from "../../domain/entities/preferred-set.entity";
 import { deckStorageService } from "../../services/local-storage";
+import { downloadDeckAsList } from "../../services/deck-export-list";
 import ImportDeckModal from "../../components/ImportDeckModal";
 import SetAutocomplete from "../../components/SetAutocomplete";
 
@@ -113,6 +114,18 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
     e.stopPropagation();
     deckStorageService.downloadDeckAsJson(deck);
     setImportJsonMessage({ type: "success", text: `Deck "${deck.name}" exportado com sucesso!` });
+    setTimeout(() => setImportJsonMessage(null), 3000);
+  };
+
+  const handleExportSingleDeckAsList = (deck: DeckEntity, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (deck.cards.length === 0) {
+      setImportJsonMessage({ type: "error", text: `O deck "${deck.name}" está vazio.` });
+      setTimeout(() => setImportJsonMessage(null), 3000);
+      return;
+    }
+    downloadDeckAsList(deck);
+    setImportJsonMessage({ type: "success", text: `Lista do deck "${deck.name}" exportada com sucesso!` });
     setTimeout(() => setImportJsonMessage(null), 3000);
   };
 
@@ -328,6 +341,13 @@ const DeckSelection: FC<DeckSelectionProps> = ({ onSelectDeck, onDeckDeleted }) 
                   
                   {/* Botões de ação no canto */}
                   <div className="absolute top-2 right-2 flex gap-1">
+                    <button
+                      onClick={(e) => handleExportSingleDeckAsList(deck, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-black/50 backdrop-blur-sm text-purple-400 hover:bg-black/70 hover:text-purple-300 transition-all cursor-pointer"
+                      title="Exportar deck como lista"
+                    >
+                      📋
+                    </button>
                     <button
                       onClick={(e) => handleExportSingleDeck(deck, e)}
                       className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-black/50 backdrop-blur-sm text-emerald-400 hover:bg-black/70 hover:text-emerald-300 transition-all cursor-pointer"
