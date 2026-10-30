@@ -11,23 +11,23 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 export const getCardTokensService = async (
   card: Card,
-  preferredSetCode?: string
+  preferredSetCode?: string,
 ): Promise<CardEntity[]> => {
   if (!card.all_parts) return [];
 
   const tokenParts = card.all_parts.filter(
-    (part: RelatedCard) => part.component === "token"
+    (part: RelatedCard) => part.component === "token",
   );
 
   if (tokenParts.length === 0) return [];
 
   const tokens: CardEntity[] = [];
-  const seenTokenNames = new Set<string>();
+  const seenTokenIds = new Set<string>();
 
   for (const tokenPart of tokenParts) {
     // Evita duplicar tokens com o mesmo nome
-    if (seenTokenNames.has(tokenPart.name)) continue;
-    seenTokenNames.add(tokenPart.name);
+    if (seenTokenIds.has(tokenPart.id)) continue;
+    seenTokenIds.add(tokenPart.id);
 
     // Busca o token pelo ID
     const tokenResult = await getCardByIdService(tokenPart.id);
@@ -40,7 +40,7 @@ export const getCardTokensService = async (
       if (preferredSetCode) {
         const preferredTokenResult = await getCardByNameAndSetService(
           tokenEntity.name,
-          preferredSetCode
+          preferredSetCode,
         );
         if (preferredTokenResult.success) {
           tokenEntity = CardEntity.new(preferredTokenResult.data);
@@ -54,7 +54,3 @@ export const getCardTokensService = async (
 
   return tokens;
 };
-
-
-
-
