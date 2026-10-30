@@ -26,8 +26,13 @@ const ChangeCardVariationModal: FC<ChangeCardVariationModalProps> = ({
   const [cards, setCards] = useState<CardEntity[]>([]);
   const [loading, setLoading] = useState(false);
   // Se tiver preferredSet, inicia no modo "set" com ele já selecionado
-  const [filterMode, setFilterMode] = useState<FilterMode>(preferredSet ? "set" : "card");
-  const [selectedSet, setSelectedSet] = useState<{ code: string; name: string } | null>(preferredSet || null);
+  const [filterMode, setFilterMode] = useState<FilterMode>(
+    preferredSet ? "set" : "card",
+  );
+  const [selectedSet, setSelectedSet] = useState<{
+    code: string;
+    name: string;
+  } | null>(preferredSet || null);
 
   // Busca variações da carta (modo padrão)
   useEffect(() => {
@@ -87,13 +92,15 @@ const ChangeCardVariationModal: FC<ChangeCardVariationModalProps> = ({
         <div className="mb-4 pb-4 border-b border-slate-700">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-white">Selecionar Versão</h2>
+              <h2 className="text-xl font-bold text-white">
+                Selecionar Versão
+              </h2>
               <p className="text-sm text-slate-400 mt-1">
                 {filterMode === "card"
                   ? `Escolha uma versão diferente para "${card.name}"`
                   : selectedSet
-                  ? `Mostrando versões de "${card.name}" em "${selectedSet.name}"`
-                  : "Selecione uma coleção para ver as versões disponíveis"}
+                    ? `Mostrando versões de "${card.name}" em "${selectedSet.name}"`
+                    : "Selecione uma coleção para ver as versões disponíveis"}
               </p>
             </div>
 
@@ -181,14 +188,18 @@ const ChangeCardVariationModal: FC<ChangeCardVariationModalProps> = ({
               ))}
             </Grid>
           )}
-          {!loading && cards.length === 0 && filterMode === "set" && selectedSet && (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400">
-              <p className="text-lg font-medium">Carta não encontrada</p>
-              <p className="text-sm text-slate-500 mt-1">
-                "{card.name}" não está disponível na coleção "{selectedSet.name}"
-              </p>
-            </div>
-          )}
+          {!loading &&
+            cards.length === 0 &&
+            filterMode === "set" &&
+            selectedSet && (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <p className="text-lg font-medium">Carta não encontrada</p>
+                <p className="text-sm text-slate-500 mt-1">
+                  "{card.name}" não está disponível na coleção "
+                  {selectedSet.name}"
+                </p>
+              </div>
+            )}
         </div>
 
         <div className="mt-4 flex justify-end">

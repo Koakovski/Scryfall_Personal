@@ -31,17 +31,17 @@ export type CardType = (typeof CARD_TYPES)[number] | "Other";
  */
 export function extractMainCardType(typeLine?: string): CardType {
   if (!typeLine) return "Other";
-  
+
   // Pega apenas a parte antes de " — " (subtipo)
   const mainTypePart = typeLine.split(" — ")[0].toUpperCase();
-  
+
   // Verifica cada tipo na ordem de prioridade
   for (const cardType of CARD_TYPES) {
     if (mainTypePart.includes(cardType.toUpperCase())) {
       return cardType;
     }
   }
-  
+
   return "Other";
 }
 
@@ -65,7 +65,7 @@ export class CardEntity {
   static new(card: Card): CardEntity {
     const { frontUri, backUri } = CardEntity.extractImageUris(card);
     const isDoubleFaced = DOUBLE_FACED_LAYOUTS.includes(card.layout);
-    
+
     // Para cartas double-faced, usa o type_line da primeira face se não houver type_line global
     const typeLine = card.type_line ?? card.card_faces?.[0]?.type_line;
 
@@ -106,7 +106,7 @@ export class CardEntity {
 
     // Fallback para primeira face disponível
     const faceWithUri = card.card_faces?.find(
-      (face) => face.image_uris?.normal
+      (face) => face.image_uris?.normal,
     );
     if (faceWithUri?.image_uris?.normal) {
       return { frontUri: faceWithUri.image_uris.normal, backUri: undefined };

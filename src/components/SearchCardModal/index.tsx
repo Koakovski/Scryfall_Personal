@@ -39,7 +39,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
         result.data.data.map((card) => ({
           entity: CardEntity.new(card),
           rawData: card,
-        }))
+        })),
       );
     }
     setLoading(false);
@@ -71,7 +71,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
       // Tenta buscar a carta na coleção preferencial
       const preferredResult = await getCardByNameAndSetService(
         cardWithData.entity.name,
-        preferredSet.code
+        preferredSet.code,
       );
 
       if (preferredResult.success) {
@@ -84,7 +84,7 @@ const SearchCardModal: FC<SearchCardModalProps> = ({
     // Busca os tokens da carta
     const tokens = await getCardTokensService(
       cardForTokens.all_parts ? cardForTokens : cardWithData.rawData,
-      preferredSet?.code
+      preferredSet?.code,
     );
 
     onSelectCard(finalCard, tokens.length > 0 ? tokens : undefined);

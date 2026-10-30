@@ -20,14 +20,14 @@ class HttpClient {
       },
       (error) => {
         return Promise.reject(error);
-      }
+      },
     );
 
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -38,7 +38,7 @@ class HttpClient {
   async post<T>(
     url: string,
     data?: unknown,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<Result<T>> {
     return this.handleRequest<T>(this.axiosInstance.post(url, data, config));
   }
@@ -46,20 +46,20 @@ class HttpClient {
   async put<T>(
     url: string,
     data?: unknown,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<Result<T>> {
     return this.handleRequest<T>(this.axiosInstance.put(url, data, config));
   }
 
   async delete<T>(
     url: string,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<Result<T>> {
     return this.handleRequest<T>(this.axiosInstance.delete(url, config));
   }
 
   private async handleRequest<T>(
-    request: Promise<AxiosResponse<T>>
+    request: Promise<AxiosResponse<T>>,
   ): Promise<Result<T>> {
     try {
       const response = await request;

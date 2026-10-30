@@ -49,4 +49,3 @@ export type SetList = {
   has_more: boolean;
   data: Set[];
 };
-

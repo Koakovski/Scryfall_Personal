@@ -1,7 +1,7 @@
 import { searchCardsService } from "./serch-cards.service";
 
 export const searchCardVariationsService = async (
-  params: SearchCardsServiceParams
+  params: SearchCardsServiceParams,
 ) => {
   // Se tiver oracleId, busca por ele; caso contrário, busca pelo nome exato
   const searchQuery = params.oracleId

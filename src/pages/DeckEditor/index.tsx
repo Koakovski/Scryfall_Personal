@@ -1,7 +1,11 @@
 import { FC, useState, useEffect, useMemo } from "react";
 import Grid from "../../components/Grid";
 import GridItem from "../../components/GridItem";
-import { CardEntity, CardType, CARD_TYPES } from "../../domain/entities/card.entity";
+import {
+  CardEntity,
+  CardType,
+  CARD_TYPES,
+} from "../../domain/entities/card.entity";
 import { DeckCardEntity } from "../../domain/entities/deck-card.entity";
 import { PreferredSetEntity } from "../../domain/entities/preferred-set.entity";
 import SearchCardModal from "../../components/SearchCardModal";
@@ -10,20 +14,66 @@ import SetAutocomplete from "../../components/SetAutocomplete";
 import { DeckEntity } from "../../domain/entities/deck.entity";
 import { deckStorageService } from "../../services/local-storage";
 import { downloadDeckAsZip } from "../../services/deck-download";
-import { downloadDeckAsPdf, PDF_FORMATS, PdfFormat } from "../../services/deck-download-pdf";
-import { copyDeckAsList, downloadDeckAsList } from "../../services/deck-export-list";
+import {
+  downloadDeckAsPdf,
+  PDF_FORMATS,
+  PdfFormat,
+} from "../../services/deck-download-pdf";
+import {
+  copyDeckAsList,
+  downloadDeckAsList,
+} from "../../services/deck-export-list";
 
 /** Mapeamento de tipos para ícones e cores */
-const TYPE_CONFIG: Record<CardType, { icon: string; label: string; color: string }> = {
-  Creature: { icon: "🐉", label: "Criaturas", color: "from-green-500/20 to-green-600/10 border-green-500/30" },
-  Planeswalker: { icon: "✨", label: "Planeswalkers", color: "from-amber-500/20 to-amber-600/10 border-amber-500/30" },
-  Battle: { icon: "⚔️", label: "Batalhas", color: "from-red-500/20 to-red-600/10 border-red-500/30" },
-  Artifact: { icon: "⚙️", label: "Artefatos", color: "from-slate-400/20 to-slate-500/10 border-slate-400/30" },
-  Enchantment: { icon: "🔮", label: "Encantamentos", color: "from-purple-500/20 to-purple-600/10 border-purple-500/30" },
-  Instant: { icon: "⚡", label: "Mágicas Instantâneas", color: "from-blue-500/20 to-blue-600/10 border-blue-500/30" },
-  Sorcery: { icon: "📜", label: "Feitiços", color: "from-rose-500/20 to-rose-600/10 border-rose-500/30" },
-  Land: { icon: "🏔️", label: "Terrenos", color: "from-amber-700/20 to-amber-800/10 border-amber-700/30" },
-  Other: { icon: "❓", label: "Outros", color: "from-slate-600/20 to-slate-700/10 border-slate-600/30" },
+const TYPE_CONFIG: Record<
+  CardType,
+  { icon: string; label: string; color: string }
+> = {
+  Creature: {
+    icon: "🐉",
+    label: "Criaturas",
+    color: "from-green-500/20 to-green-600/10 border-green-500/30",
+  },
+  Planeswalker: {
+    icon: "✨",
+    label: "Planeswalkers",
+    color: "from-amber-500/20 to-amber-600/10 border-amber-500/30",
+  },
+  Battle: {
+    icon: "⚔️",
+    label: "Batalhas",
+    color: "from-red-500/20 to-red-600/10 border-red-500/30",
+  },
+  Artifact: {
+    icon: "⚙️",
+    label: "Artefatos",
+    color: "from-slate-400/20 to-slate-500/10 border-slate-400/30",
+  },
+  Enchantment: {
+    icon: "🔮",
+    label: "Encantamentos",
+    color: "from-purple-500/20 to-purple-600/10 border-purple-500/30",
+  },
+  Instant: {
+    icon: "⚡",
+    label: "Mágicas Instantâneas",
+    color: "from-blue-500/20 to-blue-600/10 border-blue-500/30",
+  },
+  Sorcery: {
+    icon: "📜",
+    label: "Feitiços",
+    color: "from-rose-500/20 to-rose-600/10 border-rose-500/30",
+  },
+  Land: {
+    icon: "🏔️",
+    label: "Terrenos",
+    color: "from-amber-700/20 to-amber-800/10 border-amber-700/30",
+  },
+  Other: {
+    icon: "❓",
+    label: "Outros",
+    color: "from-slate-600/20 to-slate-700/10 border-slate-600/30",
+  },
 };
 
 type DeckEditorProps = {
@@ -41,7 +91,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
   } | null>(
     deck.preferredSet
       ? { code: deck.preferredSet.code, name: deck.preferredSet.name }
-      : null
+      : null,
   );
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState(deck.name);
@@ -49,7 +99,9 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [showPdfFormatDropdown, setShowPdfFormatDropdown] = useState(false);
   const [showListExportDropdown, setShowListExportDropdown] = useState(false);
-  const [listExportMessage, setListExportMessage] = useState<string | null>(null);
+  const [listExportMessage, setListExportMessage] = useState<string | null>(
+    null,
+  );
   const [downloadProgress, setDownloadProgress] = useState<{
     current: number;
     total: number;
@@ -60,10 +112,12 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     total: number;
     currentCard: string;
   } | null>(null);
-  const [collapsedSections, setCollapsedSections] = useState<Set<CardType>>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<CardType>>(
+    new Set(),
+  );
 
   const toggleSection = (type: CardType) => {
-    setCollapsedSections(prev => {
+    setCollapsedSections((prev) => {
       const next = new Set(prev);
       if (next.has(type)) {
         next.delete(type);
@@ -79,7 +133,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     setEditingSet(
       deck.preferredSet
         ? { code: deck.preferredSet.code, name: deck.preferredSet.name }
-        : null
+        : null,
     );
     setEditingName(deck.name);
   }, [deck]);
@@ -115,7 +169,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     setEditingSet(
       deck.preferredSet
         ? { code: deck.preferredSet.code, name: deck.preferredSet.name }
-        : null
+        : null,
     );
   };
 
@@ -141,7 +195,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
   function onSelectCard(card: CardEntity, tokens?: CardEntity[]) {
     // Verifica se a carta já existe no deck (pelo oracleId para considerar versões diferentes)
     const existingIndex = cards.findIndex(
-      (c) => c.card.oracleId === card.oracleId
+      (c) => c.card.oracleId === card.oracleId,
     );
 
     if (existingIndex !== -1) {
@@ -191,10 +245,17 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     saveDeck(updatedCardsList);
   };
 
-  const onChangeToken = (cardIndex: number, tokenIndex: number, newToken: CardEntity) => {
+  const onChangeToken = (
+    cardIndex: number,
+    tokenIndex: number,
+    newToken: CardEntity,
+  ) => {
     const updatedCardsList = [...cards];
     // Usa withTokenVariation para alterar apenas a versão do token
-    updatedCardsList[cardIndex] = cards[cardIndex].withTokenVariation(tokenIndex, newToken);
+    updatedCardsList[cardIndex] = cards[cardIndex].withTokenVariation(
+      tokenIndex,
+      newToken,
+    );
     setCards(updatedCardsList);
     saveDeck(updatedCardsList);
   };
@@ -227,16 +288,24 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
     saveDeck(updatedCardsList);
   };
 
-  const onSetTokenCustomArt = (cardIndex: number, tokenIndex: number, imageUri: string) => {
+  const onSetTokenCustomArt = (
+    cardIndex: number,
+    tokenIndex: number,
+    imageUri: string,
+  ) => {
     const updatedCardsList = [...cards];
-    updatedCardsList[cardIndex] = cards[cardIndex].withTokenCustomArt(tokenIndex, imageUri);
+    updatedCardsList[cardIndex] = cards[cardIndex].withTokenCustomArt(
+      tokenIndex,
+      imageUri,
+    );
     setCards(updatedCardsList);
     saveDeck(updatedCardsList);
   };
 
   const onRemoveTokenCustomArt = (cardIndex: number, tokenIndex: number) => {
     const updatedCardsList = [...cards];
-    updatedCardsList[cardIndex] = cards[cardIndex].removeTokenCustomArt(tokenIndex);
+    updatedCardsList[cardIndex] =
+      cards[cardIndex].removeTokenCustomArt(tokenIndex);
     setCards(updatedCardsList);
     saveDeck(updatedCardsList);
   };
@@ -253,20 +322,25 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
 
   /** Agrupa as cartas por tipo principal */
   const cardsByType = useMemo(() => {
-    const grouped = new Map<CardType, { deckCard: DeckCardEntity; originalIndex: number }[]>();
-    
+    const grouped = new Map<
+      CardType,
+      { deckCard: DeckCardEntity; originalIndex: number }[]
+    >();
+
     // Inicializa os grupos na ordem dos tipos
     for (const type of [...CARD_TYPES, "Other" as const]) {
       grouped.set(type, []);
     }
-    
+
     cards.forEach((deckCard, originalIndex) => {
       const mainType = deckCard.card.mainType;
       grouped.get(mainType)?.push({ deckCard, originalIndex });
     });
-    
+
     // Remove grupos vazios e retorna como array
-    return Array.from(grouped.entries()).filter(([, cards]) => cards.length > 0);
+    return Array.from(grouped.entries()).filter(
+      ([, cards]) => cards.length > 0,
+    );
   }, [cards]);
 
   const handleCopyDeckList = async () => {
@@ -302,17 +376,17 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
 
   const handleDownloadDeck = async () => {
     if (cards.length === 0) return;
-    
+
     setIsDownloading(true);
     setDownloadProgress(null);
-    
+
     try {
       // Recria o deck atual para garantir que temos os dados mais recentes
       const currentDeck = DeckEntity.fromData({
         ...deck.toData(),
         cards: cards.map((c) => c.toData()),
       });
-      
+
       await downloadDeckAsZip(currentDeck, (progress) => {
         setDownloadProgress(progress);
       });
@@ -327,18 +401,18 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
 
   const handleDownloadPdf = async (format: PdfFormat) => {
     if (cards.length === 0) return;
-    
+
     setShowPdfFormatDropdown(false);
     setIsDownloadingPdf(true);
     setDownloadPdfProgress(null);
-    
+
     try {
       // Recria o deck atual para garantir que temos os dados mais recentes
       const currentDeck = DeckEntity.fromData({
         ...deck.toData(),
         cards: cards.map((c) => c.toData()),
       });
-      
+
       await downloadDeckAsPdf(currentDeck, format, (progress) => {
         setDownloadPdfProgress(progress);
       });
@@ -452,7 +526,7 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                     ? `${deck.preferredSet.name} (${deck.preferredSet.code.toUpperCase()})`
                     : "Definir Coleção"}
                 </button>
-                
+
                 {/* Botão de Exportar JSON */}
                 <button
                   onClick={() => deckStorageService.downloadDeckAsJson(deck)}
@@ -466,14 +540,21 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                 {/* Botão de Exportar Lista */}
                 <div className="relative">
                   <button
-                    onClick={() => cards.length > 0 && setShowListExportDropdown(!showListExportDropdown)}
+                    onClick={() =>
+                      cards.length > 0 &&
+                      setShowListExportDropdown(!showListExportDropdown)
+                    }
                     disabled={cards.length === 0}
                     className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                       cards.length === 0
                         ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
                         : "bg-purple-600/20 text-purple-300 border border-purple-500/40 hover:bg-purple-600/30"
                     }`}
-                    title={cards.length === 0 ? "Adicione cartas para exportar" : "Exportar deck como lista de texto"}
+                    title={
+                      cards.length === 0
+                        ? "Adicione cartas para exportar"
+                        : "Exportar deck como lista de texto"
+                    }
                   >
                     <span>📋</span>
                     Lista
@@ -502,13 +583,17 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                           onClick={handleCopyDeckList}
                           className="w-full px-3 py-2 text-left hover:bg-slate-700 transition-colors cursor-pointer"
                         >
-                          <span className="text-xs font-medium text-white">Copiar lista</span>
+                          <span className="text-xs font-medium text-white">
+                            Copiar lista
+                          </span>
                         </button>
                         <button
                           onClick={handleDownloadDeckList}
                           className="w-full px-3 py-2 text-left hover:bg-slate-700 transition-colors cursor-pointer border-t border-slate-700"
                         >
-                          <span className="text-xs font-medium text-white">Baixar .txt</span>
+                          <span className="text-xs font-medium text-white">
+                            Baixar .txt
+                          </span>
                         </button>
                       </div>
                     </>
@@ -529,10 +614,14 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                     isDownloading
                       ? "bg-emerald-600/40 text-emerald-300 border border-emerald-500/40"
                       : cards.length === 0
-                      ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
-                      : "bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30"
+                        ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                        : "bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30"
                   }`}
-                  title={cards.length === 0 ? "Adicione cartas para baixar" : "Baixar imagens do deck em ZIP"}
+                  title={
+                    cards.length === 0
+                      ? "Adicione cartas para baixar"
+                      : "Baixar imagens do deck em ZIP"
+                  }
                 >
                   {isDownloading ? (
                     <>
@@ -582,16 +671,24 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                 {/* Botão de Download PDF A4 com Dropdown */}
                 <div className="relative">
                   <button
-                    onClick={() => !isDownloadingPdf && cards.length > 0 && setShowPdfFormatDropdown(!showPdfFormatDropdown)}
+                    onClick={() =>
+                      !isDownloadingPdf &&
+                      cards.length > 0 &&
+                      setShowPdfFormatDropdown(!showPdfFormatDropdown)
+                    }
                     disabled={isDownloadingPdf || cards.length === 0}
                     className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                       isDownloadingPdf
                         ? "bg-amber-600/40 text-amber-300 border border-amber-500/40"
                         : cards.length === 0
-                        ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
-                        : "bg-amber-600/20 text-amber-300 border border-amber-500/40 hover:bg-amber-600/30"
+                          ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                          : "bg-amber-600/20 text-amber-300 border border-amber-500/40 hover:bg-amber-600/30"
                     }`}
-                    title={cards.length === 0 ? "Adicione cartas para baixar" : "Baixar PDF para impressão A4"}
+                    title={
+                      cards.length === 0
+                        ? "Adicione cartas para baixar"
+                        : "Baixar PDF para impressão A4"
+                    }
                   >
                     {isDownloadingPdf ? (
                       <>
@@ -694,14 +791,19 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🃏</div>
             <p className="text-slate-400 text-lg">Seu deck está vazio</p>
-            <p className="text-slate-500 text-sm mt-1">Clique no botão + para adicionar cartas</p>
+            <p className="text-slate-500 text-sm mt-1">
+              Clique no botão + para adicionar cartas
+            </p>
           </div>
         ) : (
           cardsByType.map(([type, cardsOfType]) => {
             const config = TYPE_CONFIG[type];
-            const totalQuantity = cardsOfType.reduce((sum, { deckCard }) => sum + deckCard.quantity, 0);
+            const totalQuantity = cardsOfType.reduce(
+              (sum, { deckCard }) => sum + deckCard.quantity,
+              0,
+            );
             const isCollapsed = collapsedSections.has(type);
-            
+
             return (
               <section key={type} className="space-y-3">
                 {/* Header da seção - clicável para minimizar */}
@@ -730,11 +832,13 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                     ({totalQuantity} {totalQuantity === 1 ? "carta" : "cartas"})
                   </span>
                 </button>
-                
+
                 {/* Grid de cartas - com animação de colapso */}
                 <div
                   className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    isCollapsed ? "max-h-0 opacity-0" : "max-h-[5000px] opacity-100"
+                    isCollapsed
+                      ? "max-h-0 opacity-0"
+                      : "max-h-[5000px] opacity-100"
                   }`}
                 >
                   <Grid gridCols="4">
@@ -747,19 +851,50 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                           tokensData={deckCard.tokensData}
                           customImageUri={deckCard.customImageUri}
                           customBackImageUri={deckCard.customBackImageUri}
-                          onIncreaseQuantity={() => onIncreaseQuantity(originalIndex)}
-                          onDecreaseQuantity={() => onDecreaseQuantity(originalIndex)}
-                          onChangeCard={(newCard) => onChangeCard(originalIndex, newCard)}
-                          onChangeToken={(tokenIndex, newToken) => onChangeToken(originalIndex, tokenIndex, newToken)}
+                          onIncreaseQuantity={() =>
+                            onIncreaseQuantity(originalIndex)
+                          }
+                          onDecreaseQuantity={() =>
+                            onDecreaseQuantity(originalIndex)
+                          }
+                          onChangeCard={(newCard) =>
+                            onChangeCard(originalIndex, newCard)
+                          }
+                          onChangeToken={(tokenIndex, newToken) =>
+                            onChangeToken(originalIndex, tokenIndex, newToken)
+                          }
                           onSetAsCover={() => handleSetAsCover(deckCard.cardId)}
-                          onSetCustomArt={(imageUri) => onSetCustomArt(originalIndex, imageUri)}
-                          onRemoveCustomArt={() => onRemoveCustomArt(originalIndex)}
-                          onSetCustomBackArt={(imageUri) => onSetCustomBackArt(originalIndex, imageUri)}
-                          onRemoveCustomBackArt={() => onRemoveCustomBackArt(originalIndex)}
-                          onSetTokenCustomArt={(tokenIndex, imageUri) => onSetTokenCustomArt(originalIndex, tokenIndex, imageUri)}
-                          onRemoveTokenCustomArt={(tokenIndex) => onRemoveTokenCustomArt(originalIndex, tokenIndex)}
+                          onSetCustomArt={(imageUri) =>
+                            onSetCustomArt(originalIndex, imageUri)
+                          }
+                          onRemoveCustomArt={() =>
+                            onRemoveCustomArt(originalIndex)
+                          }
+                          onSetCustomBackArt={(imageUri) =>
+                            onSetCustomBackArt(originalIndex, imageUri)
+                          }
+                          onRemoveCustomBackArt={() =>
+                            onRemoveCustomBackArt(originalIndex)
+                          }
+                          onSetTokenCustomArt={(tokenIndex, imageUri) =>
+                            onSetTokenCustomArt(
+                              originalIndex,
+                              tokenIndex,
+                              imageUri,
+                            )
+                          }
+                          onRemoveTokenCustomArt={(tokenIndex) =>
+                            onRemoveTokenCustomArt(originalIndex, tokenIndex)
+                          }
                           isCoverCard={deck.coverCardId === deckCard.cardId}
-                          preferredSet={deck.preferredSet ? { code: deck.preferredSet.code, name: deck.preferredSet.name } : null}
+                          preferredSet={
+                            deck.preferredSet
+                              ? {
+                                  code: deck.preferredSet.code,
+                                  name: deck.preferredSet.name,
+                                }
+                              : null
+                          }
                         />
                       </GridItem>
                     ))}
@@ -782,8 +917,17 @@ const DeckEditor: FC<DeckEditorProps> = ({ deck, onDeckUpdate }) => {
                    ring-4 ring-amber-500/20"
         title="Adicionar carta"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-7 w-7"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+            clipRule="evenodd"
+          />
         </svg>
       </button>
     </div>

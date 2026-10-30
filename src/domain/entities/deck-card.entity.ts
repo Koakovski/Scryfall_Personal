@@ -26,14 +26,15 @@ export class DeckCardEntity {
   static new(
     card: CardEntity,
     quantity: number = 1,
-    tokens: CardEntity[] = []
+    tokens: CardEntity[] = [],
   ): DeckCardEntity {
     return new DeckCardEntity({
       card: card.toData(),
       quantity,
-      tokensData: tokens.length > 0 
-        ? tokens.map((t) => ({ card: t.toData() })) 
-        : undefined,
+      tokensData:
+        tokens.length > 0
+          ? tokens.map((t) => ({ card: t.toData() }))
+          : undefined,
     });
   }
 
@@ -107,7 +108,10 @@ export class DeckCardEntity {
   getTokenDisplayImageUri(tokenIndex: number): string {
     const tokenData = this.tokensData[tokenIndex];
     if (!tokenData) return "";
-    return tokenData.customImageUri ?? CardEntity.fromData(tokenData.card).normalImageUri;
+    return (
+      tokenData.customImageUri ??
+      CardEntity.fromData(tokenData.card).normalImageUri
+    );
   }
 
   increaseQuantity(amount: number = 1): DeckCardEntity {
@@ -149,9 +153,10 @@ export class DeckCardEntity {
     return new DeckCardEntity({
       ...this.data,
       tokens: undefined, // Remove estrutura antiga
-      tokensData: tokens.length > 0 
-        ? tokens.map((t) => ({ card: t.toData() })) 
-        : undefined,
+      tokensData:
+        tokens.length > 0
+          ? tokens.map((t) => ({ card: t.toData() }))
+          : undefined,
     });
   }
 
@@ -269,12 +274,13 @@ export class DeckCardEntity {
 
   toData(): DeckCardData {
     // Converte tokensData para o formato correto
-    const tokensData = this.tokensData.length > 0 
-      ? this.tokensData.map((t) => ({
-          card: { ...t.card },
-          customImageUri: t.customImageUri,
-        }))
-      : undefined;
+    const tokensData =
+      this.tokensData.length > 0
+        ? this.tokensData.map((t) => ({
+            card: { ...t.card },
+            customImageUri: t.customImageUri,
+          }))
+        : undefined;
 
     return {
       card: { ...this.data.card },
@@ -285,4 +291,3 @@ export class DeckCardEntity {
     };
   }
 }
-

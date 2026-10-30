@@ -19,7 +19,10 @@ type CustomArtModalProps = {
 
 type InputMode = "upload" | "url";
 
-const getArtTypeLabel = (artType: CustomArtType, tokenName?: string): string => {
+const getArtTypeLabel = (
+  artType: CustomArtType,
+  tokenName?: string,
+): string => {
   switch (artType) {
     case "front":
       return "Frente";
@@ -53,7 +56,9 @@ const CustomArtModal: FC<CustomArtModalProps> = ({
 }) => {
   const [inputMode, setInputMode] = useState<InputMode>("upload");
   const [imageUrl, setImageUrl] = useState("");
-  const [previewUrl, setPreviewUrl] = useState<string | null>(currentCustomArt ?? null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    currentCustomArt ?? null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -151,7 +156,8 @@ const CustomArtModal: FC<CustomArtModalProps> = ({
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-700 bg-slate-800/50">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span>{getArtTypeIcon(artType)}</span> Arte Customizada - {getArtTypeLabel(artType, tokenName)}
+            <span>{getArtTypeIcon(artType)}</span> Arte Customizada -{" "}
+            {getArtTypeLabel(artType, tokenName)}
           </h2>
           <p className="text-sm text-slate-400 mt-1">
             Defina uma arte personalizada para{" "}
@@ -224,9 +230,10 @@ const CustomArtModal: FC<CustomArtModalProps> = ({
             <button
               onClick={() => setInputMode("upload")}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all cursor-pointer
-                ${inputMode === "upload"
-                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/50"
-                  : "bg-slate-700/50 text-slate-400 border border-slate-600 hover:bg-slate-700"
+                ${
+                  inputMode === "upload"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/50"
+                    : "bg-slate-700/50 text-slate-400 border border-slate-600 hover:bg-slate-700"
                 }`}
             >
               <span className="mr-1.5">📤</span> Upload de Arquivo
@@ -234,9 +241,10 @@ const CustomArtModal: FC<CustomArtModalProps> = ({
             <button
               onClick={() => setInputMode("url")}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all cursor-pointer
-                ${inputMode === "url"
-                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/50"
-                  : "bg-slate-700/50 text-slate-400 border border-slate-600 hover:bg-slate-700"
+                ${
+                  inputMode === "url"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/50"
+                    : "bg-slate-700/50 text-slate-400 border border-slate-600 hover:bg-slate-700"
                 }`}
             >
               <span className="mr-1.5">🔗</span> URL de Imagem
@@ -339,4 +347,3 @@ const CustomArtModal: FC<CustomArtModalProps> = ({
 };
 
 export default CustomArtModal;
-

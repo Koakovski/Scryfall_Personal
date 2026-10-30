@@ -9,9 +9,8 @@ export const getCardByNameService = async (name: string) => {
       params: {
         fuzzy: name,
       },
-    }
+    },
   );
 
   return result;
 };
-

@@ -47,7 +47,9 @@ const Header: FC<HeaderProps> = ({ currentPage, onNavigate, deckName }) => {
             >
               ✏️ Editor
               {deckName && (
-                <span className="ml-1.5 text-xs text-slate-400">({deckName})</span>
+                <span className="ml-1.5 text-xs text-slate-400">
+                  ({deckName})
+                </span>
               )}
             </button>
           </nav>
@@ -58,4 +60,3 @@ const Header: FC<HeaderProps> = ({ currentPage, onNavigate, deckName }) => {
 };
 
 export default Header;
-

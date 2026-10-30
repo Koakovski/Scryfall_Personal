@@ -40,7 +40,10 @@ const App = () => {
       />
 
       {currentPage === "selection" && (
-        <DeckSelection onSelectDeck={handleSelectDeck} onDeckDeleted={handleDeckDeleted} />
+        <DeckSelection
+          onSelectDeck={handleSelectDeck}
+          onDeckDeleted={handleDeckDeleted}
+        />
       )}
 
       {currentPage === "editor" && selectedDeck && (

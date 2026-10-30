@@ -18,7 +18,7 @@ export class DeckEntity {
   static new(
     name: string,
     cards: DeckCardEntity[] = [],
-    preferredSet?: PreferredSetEntity
+    preferredSet?: PreferredSetEntity,
   ): DeckEntity {
     const now = new Date().toISOString();
     return new DeckEntity({
@@ -66,7 +66,7 @@ export class DeckEntity {
   get coverCard(): CardEntity | undefined {
     if (!this.data.coverCardId) return undefined;
     const deckCard = this.data.cards.find(
-      (c) => c.card.id === this.data.coverCardId
+      (c) => c.card.id === this.data.coverCardId,
     );
     return deckCard ? CardEntity.fromData(deckCard.card) : undefined;
   }
@@ -132,7 +132,7 @@ export class DeckEntity {
    */
   addCard(card: CardEntity, quantity: number = 1): this {
     const existingIndex = this.data.cards.findIndex(
-      (c) => c.card.id === card.id
+      (c) => c.card.id === card.id,
     );
 
     if (existingIndex !== -1) {

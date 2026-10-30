@@ -22,7 +22,7 @@ const CardItem: FC<CardItemProps> = ({
 }) => {
   const [internalIsFlipped, setInternalIsFlipped] = useState(false);
   const alt = `${card.name} (${card.setName} #${card.collectorNumber})`;
-  
+
   // Usa a imagem customizada se disponível, senão usa a original
   const displayFrontImageUri = customImageUri ?? card.normalImageUri;
   const displayBackImageUri = customBackImageUri ?? card.backImageUri;

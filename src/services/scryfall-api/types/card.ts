@@ -47,18 +47,10 @@ export type CardFrameEffect =
 export type CardFrame = "1993" | "1997" | "2003" | "2015" | "future";
 
 export type CardBorderColor =
-  | "black"
-  | "white"
-  | "borderless"
-  | "silver"
-  | "gold";
+  "black" | "white" | "borderless" | "silver" | "gold";
 
 export type CardSecurityStamp =
-  | "oval"
-  | "triangle"
-  | "acorn"
-  | "circle"
-  | "arena";
+  "oval" | "triangle" | "acorn" | "circle" | "arena";
 
 export type CardFinish = "nonfoil" | "foil" | "etched" | "glossy";
 
@@ -67,12 +59,7 @@ export type CardGames = "paper" | "arena" | "mtgo";
 export type CardLegality = "legal" | "not_legal" | "restricted" | "banned";
 
 export type CardImageSizes =
-  | "small"
-  | "normal"
-  | "large"
-  | "png"
-  | "art_crop"
-  | "border_crop";
+  "small" | "normal" | "large" | "png" | "art_crop" | "border_crop";
 
 export type CardPrices = {
   usd?: string;
@@ -90,10 +77,7 @@ export type CardPreview = {
 };
 
 export type RelatedCardComponent =
-  | "token"
-  | "meld_part"
-  | "meld_result"
-  | "combo_piece";
+  "token" | "meld_part" | "meld_result" | "combo_piece";
 
 export type RelatedCard = {
   object: "related_card";

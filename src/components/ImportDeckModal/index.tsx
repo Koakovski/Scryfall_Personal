@@ -24,10 +24,16 @@ type ImportProgress = {
 
 type ImportState = "idle" | "importing" | "finished";
 
-const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) => {
+const ImportDeckModal: FC<ImportDeckModalProps> = ({
+  close,
+  onDeckImported,
+}) => {
   const [deckName, setDeckName] = useState("");
   const [cardList, setCardList] = useState("");
-  const [preferredSet, setPreferredSet] = useState<{ code: string; name: string } | null>(null);
+  const [preferredSet, setPreferredSet] = useState<{
+    code: string;
+    name: string;
+  } | null>(null);
   const [importState, setImportState] = useState<ImportState>("idle");
   const [progress, setProgress] = useState<ImportProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,12 +50,14 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
       setCardList(content);
     };
     reader.readAsText(file);
-    
+
     // Limpa o input para permitir selecionar o mesmo arquivo novamente
     e.target.value = "";
   };
 
-  const parseCardList = (text: string): { quantity: number; name: string }[] => {
+  const parseCardList = (
+    text: string,
+  ): { quantity: number; name: string }[] => {
     const lines = text.split("\n").filter((line) => line.trim());
     const cards: { quantity: number; name: string }[] = [];
 
@@ -72,7 +80,8 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
     return cards;
   };
 
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleImport = async () => {
     if (!deckName.trim()) {
@@ -121,7 +130,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
         if (preferredSet) {
           const preferredResult = await getCardByNameAndSetService(
             cardEntity.name,
-            preferredSet.code
+            preferredSet.code,
           );
           if (preferredResult.success) {
             cardEntity = CardEntity.new(preferredResult.data);
@@ -134,7 +143,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
         // Busca os tokens da carta
         const tokens = await getCardTokensService(
           cardForTokens.all_parts ? cardForTokens : originalCard,
-          preferredSet?.code
+          preferredSet?.code,
         );
 
         // Cria uma DeckCardEntity com a quantidade correta e tokens
@@ -169,7 +178,11 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
       const preferredSetEntity = preferredSet
         ? PreferredSetEntity.new(preferredSet.code, preferredSet.name)
         : undefined;
-      const deck = DeckEntity.new(deckName.trim(), foundCards, preferredSetEntity);
+      const deck = DeckEntity.new(
+        deckName.trim(),
+        foundCards,
+        preferredSetEntity,
+      );
       setFinalDeck(deck);
     }
 
@@ -202,9 +215,12 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
       <div className="relative w-full max-w-2xl max-h-[90vh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-700 bg-slate-800/50">
-          <h2 className="text-xl font-bold text-white">Importar Deck por Lista</h2>
+          <h2 className="text-xl font-bold text-white">
+            Importar Deck por Lista
+          </h2>
           <p className="text-sm text-slate-400 mt-1">
-            Cole uma lista de cartas no formato "4 Lightning Bolt" ou "Lightning Bolt"
+            Cole uma lista de cartas no formato "4 Lightning Bolt" ou "Lightning
+            Bolt"
           </p>
         </div>
 
@@ -290,7 +306,8 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                 <div className="flex justify-between text-sm text-slate-300 mb-2">
                   <span>Importando cartas...</span>
                   <span>
-                    {progress?.current || 0} / {progress?.total || 0} ({progressPercentage}%)
+                    {progress?.current || 0} / {progress?.total || 0} (
+                    {progressPercentage}%)
                   </span>
                 </div>
                 <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
@@ -312,11 +329,14 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                 {/* Found Cards */}
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                   <h4 className="text-green-400 font-medium mb-2 flex items-center gap-2">
-                    <span>✓</span> Encontradas ({progress?.foundCards.length || 0})
+                    <span>✓</span> Encontradas (
+                    {progress?.foundCards.length || 0})
                   </h4>
                   <div className="max-h-32 overflow-auto text-sm text-slate-300 space-y-1">
                     {progress?.foundCards.map((c, i) => (
-                      <p key={i}>{c.quantity}x {c.cardName}</p>
+                      <p key={i}>
+                        {c.quantity}x {c.cardName}
+                      </p>
                     ))}
                   </div>
                 </div>
@@ -324,7 +344,8 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                 {/* Not Found Cards */}
                 <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
                   <h4 className="text-red-400 font-medium mb-2 flex items-center gap-2">
-                    <span>✗</span> Não encontradas ({progress?.notFoundCards.length || 0})
+                    <span>✗</span> Não encontradas (
+                    {progress?.notFoundCards.length || 0})
                   </h4>
                   <div className="max-h-32 overflow-auto text-sm text-slate-300 space-y-1">
                     {progress?.notFoundCards.map((name, i) => (
@@ -345,12 +366,21 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                     <span>✓</span> Importação concluída!
                   </h3>
                   <p className="text-slate-300 mt-1">
-                    O deck "<span className="text-white font-medium">{finalDeck.name}</span>" foi criado com{" "}
-                    <span className="text-green-400 font-medium">{finalDeck.totalCardCount} cartas</span> ({finalDeck.uniqueCardCount} únicas).
+                    O deck "
+                    <span className="text-white font-medium">
+                      {finalDeck.name}
+                    </span>
+                    " foi criado com{" "}
+                    <span className="text-green-400 font-medium">
+                      {finalDeck.totalCardCount} cartas
+                    </span>{" "}
+                    ({finalDeck.uniqueCardCount} únicas).
                   </p>
                   {finalDeck.preferredSet && (
                     <p className="text-purple-400 text-sm mt-2 flex items-center gap-1">
-                      <span>📦</span> Coleção preferencial: {finalDeck.preferredSet.name} ({finalDeck.preferredSet.code.toUpperCase()})
+                      <span>📦</span> Coleção preferencial:{" "}
+                      {finalDeck.preferredSet.name} (
+                      {finalDeck.preferredSet.code.toUpperCase()})
                     </p>
                   )}
                 </div>
@@ -360,7 +390,8 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                     <span>✗</span> Nenhuma carta encontrada
                   </h3>
                   <p className="text-slate-300 mt-1">
-                    Não foi possível encontrar nenhuma das cartas na lista. Verifique os nomes e tente novamente.
+                    Não foi possível encontrar nenhuma das cartas na lista.
+                    Verifique os nomes e tente novamente.
                   </p>
                 </div>
               )}
@@ -370,14 +401,19 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                 {/* Found Cards */}
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                   <h4 className="text-green-400 font-medium mb-2 flex items-center gap-2">
-                    <span>✓</span> Encontradas ({progress?.foundCards.length || 0})
+                    <span>✓</span> Encontradas (
+                    {progress?.foundCards.length || 0})
                   </h4>
                   <div className="max-h-48 overflow-auto text-sm text-slate-300 space-y-1">
                     {progress?.foundCards.map((c, i) => (
-                      <p key={i}>{c.quantity}x {c.cardName}</p>
+                      <p key={i}>
+                        {c.quantity}x {c.cardName}
+                      </p>
                     ))}
                     {(progress?.foundCards.length || 0) === 0 && (
-                      <p className="text-slate-500 italic">Nenhuma carta encontrada</p>
+                      <p className="text-slate-500 italic">
+                        Nenhuma carta encontrada
+                      </p>
                     )}
                   </div>
                 </div>
@@ -385,14 +421,17 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
                 {/* Not Found Cards */}
                 <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
                   <h4 className="text-red-400 font-medium mb-2 flex items-center gap-2">
-                    <span>✗</span> Não encontradas ({progress?.notFoundCards.length || 0})
+                    <span>✗</span> Não encontradas (
+                    {progress?.notFoundCards.length || 0})
                   </h4>
                   <div className="max-h-48 overflow-auto text-sm text-slate-300 space-y-1">
                     {progress?.notFoundCards.map((name, i) => (
                       <p key={i}>{name}</p>
                     ))}
                     {(progress?.notFoundCards.length || 0) === 0 && (
-                      <p className="text-slate-500 italic">Todas as cartas foram encontradas!</p>
+                      <p className="text-slate-500 italic">
+                        Todas as cartas foram encontradas!
+                      </p>
                     )}
                   </div>
                 </div>
@@ -461,4 +500,3 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({ close, onDeckImported }) =>
 };
 
 export default ImportDeckModal;
-

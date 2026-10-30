@@ -13,7 +13,7 @@ export const searchCardsService = async (params: SearchCardsServiceParams) => {
         unique: params.unique ?? "cards",
         order: params.order ?? "name",
       },
-    }
+    },
   );
 
   return result;

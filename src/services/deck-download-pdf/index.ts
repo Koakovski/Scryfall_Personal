@@ -88,14 +88,17 @@ type ProgressCallback = (progress: DownloadProgress) => void;
  * @param imageUrl - URL da imagem
  * @param rotate90 - Se true, rotaciona a imagem 90 graus no sentido horário
  */
-async function loadImageAsBase64(imageUrl: string, rotate90: boolean = false): Promise<string> {
+async function loadImageAsBase64(
+  imageUrl: string,
+  rotate90: boolean = false,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
 
     img.onload = () => {
       const canvas = document.createElement("canvas");
-      
+
       if (rotate90) {
         // Quando rotacionamos 90 graus, largura e altura são trocadas
         canvas.width = img.naturalHeight;
@@ -119,7 +122,7 @@ async function loadImageAsBase64(imageUrl: string, rotate90: boolean = false): P
       } else {
         ctx.drawImage(img, 0, 0);
       }
-      
+
       const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
       resolve(dataUrl);
     };
@@ -143,7 +146,7 @@ async function loadImageAsBase64(imageUrl: string, rotate90: boolean = false): P
 async function loadDoubleFacedImageAsBase64(
   frontUrl: string,
   backUrl: string,
-  rotate90: boolean = false
+  rotate90: boolean = false,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const frontImg = new Image();
@@ -178,14 +181,26 @@ async function loadDoubleFacedImageAsBase64(
       ctx.save();
       ctx.translate(originalWidth / 2, halfHeight / 2);
       ctx.rotate(Math.PI / 2);
-      ctx.drawImage(frontImg, -halfHeight / 2, -originalWidth / 2, halfHeight, originalWidth);
+      ctx.drawImage(
+        frontImg,
+        -halfHeight / 2,
+        -originalWidth / 2,
+        halfHeight,
+        originalWidth,
+      );
       ctx.restore();
 
       // Desenha o verso embaixo, rotacionado 90 graus
       ctx.save();
       ctx.translate(originalWidth / 2, halfHeight + halfHeight / 2);
       ctx.rotate(Math.PI / 2);
-      ctx.drawImage(backImg, -halfHeight / 2, -originalWidth / 2, halfHeight, originalWidth);
+      ctx.drawImage(
+        backImg,
+        -halfHeight / 2,
+        -originalWidth / 2,
+        halfHeight,
+        originalWidth,
+      );
       ctx.restore();
 
       // Se rotate90 está ativo, rotaciona a imagem combinada
@@ -193,17 +208,19 @@ async function loadDoubleFacedImageAsBase64(
         const rotatedCanvas = document.createElement("canvas");
         rotatedCanvas.width = originalHeight;
         rotatedCanvas.height = originalWidth;
-        
+
         const rotatedCtx = rotatedCanvas.getContext("2d");
         if (!rotatedCtx) {
-          reject(new Error("Não foi possível criar contexto do canvas rotacionado"));
+          reject(
+            new Error("Não foi possível criar contexto do canvas rotacionado"),
+          );
           return;
         }
-        
+
         rotatedCtx.translate(rotatedCanvas.width, 0);
         rotatedCtx.rotate(Math.PI / 2);
         rotatedCtx.drawImage(canvas, 0, 0);
-        
+
         const dataUrl = rotatedCanvas.toDataURL("image/jpeg", 0.92);
         resolve(dataUrl);
       } else {
@@ -248,7 +265,7 @@ interface CardImage {
  * Agrupa cartas por nome para identificar versões diferentes
  */
 function groupCardsByName(
-  cards: DeckCardEntity[]
+  cards: DeckCardEntity[],
 ): Map<string, DeckCardEntity[]> {
   const groups = new Map<string, DeckCardEntity[]>();
 
@@ -271,7 +288,9 @@ interface TokenWithCustomArt {
 /**
  * Agrupa tokens por nome para identificar versões diferentes
  */
-function groupTokensByName(tokens: TokenWithCustomArt[]): Map<string, TokenWithCustomArt[]> {
+function groupTokensByName(
+  tokens: TokenWithCustomArt[],
+): Map<string, TokenWithCustomArt[]> {
   const groups = new Map<string, TokenWithCustomArt[]>();
 
   for (const token of tokens) {
@@ -295,7 +314,7 @@ function groupTokensByName(tokens: TokenWithCustomArt[]): Map<string, TokenWithC
 export async function downloadDeckAsPdf(
   deck: DeckEntity,
   format: PdfFormat = "3x3",
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
 ): Promise<void> {
   const config = getFormatConfig(format);
   const { marginX, marginY } = calculateMargins(config);
@@ -353,35 +372,51 @@ export async function downloadDeckAsPdf(
           // Usa artes customizadas se disponíveis, com fallback para originais
           let frontUri = card.normalImageUri;
           let backUri = card.backImageUri;
-          
+
           // Tenta usar arte customizada da frente
           if (deckCard.customImageUri) {
             try {
               await loadImageAsBase64(deckCard.customImageUri, false); // Teste de carregamento
               frontUri = deckCard.customImageUri;
             } catch (customError) {
-              console.warn(`Arte customizada da frente falhou para ${card.name}, usando original:`, customError);
+              console.warn(
+                `Arte customizada da frente falhou para ${card.name}, usando original:`,
+                customError,
+              );
             }
           }
-          
+
           // Tenta usar arte customizada do verso
           if (deckCard.customBackImageUri) {
             try {
               await loadImageAsBase64(deckCard.customBackImageUri, false); // Teste de carregamento
               backUri = deckCard.customBackImageUri;
             } catch (customError) {
-              console.warn(`Arte customizada do verso falhou para ${card.name}, usando original:`, customError);
+              console.warn(
+                `Arte customizada do verso falhou para ${card.name}, usando original:`,
+                customError,
+              );
             }
           }
-          
-          dataUrl = await loadDoubleFacedImageAsBase64(frontUri, backUri, rotate90);
+
+          dataUrl = await loadDoubleFacedImageAsBase64(
+            frontUri,
+            backUri,
+            rotate90,
+          );
         } else {
           // Para cartas normais, carrega apenas a frente (usa arte customizada se disponível)
           if (deckCard.customImageUri) {
             try {
-              dataUrl = await loadImageAsBase64(deckCard.customImageUri, rotate90);
+              dataUrl = await loadImageAsBase64(
+                deckCard.customImageUri,
+                rotate90,
+              );
             } catch (customError) {
-              console.warn(`Arte customizada falhou para ${card.name}, usando original:`, customError);
+              console.warn(
+                `Arte customizada falhou para ${card.name}, usando original:`,
+                customError,
+              );
               dataUrl = await loadImageAsBase64(card.normalImageUri, rotate90);
             }
           } else {
@@ -415,19 +450,25 @@ export async function downloadDeckAsPdf(
 
       try {
         let dataUrl: string;
-        
+
         // Tenta usar arte customizada, com fallback para original
         if (tokenWithCustomArt.customImageUri) {
           try {
-            dataUrl = await loadImageAsBase64(tokenWithCustomArt.customImageUri, rotate90);
+            dataUrl = await loadImageAsBase64(
+              tokenWithCustomArt.customImageUri,
+              rotate90,
+            );
           } catch (customError) {
-            console.warn(`Arte customizada falhou para token ${token.name}, usando original:`, customError);
+            console.warn(
+              `Arte customizada falhou para token ${token.name}, usando original:`,
+              customError,
+            );
             dataUrl = await loadImageAsBase64(token.normalImageUri, rotate90);
           }
         } else {
           dataUrl = await loadImageAsBase64(token.normalImageUri, rotate90);
         }
-        
+
         cardImages.push({
           dataUrl,
           quantity: 1, // Tokens sempre 1 cópia
@@ -443,14 +484,14 @@ export async function downloadDeckAsPdf(
   // Verifica se alguma imagem foi carregada
   if (cardImages.length === 0) {
     throw new Error(
-      `Nenhuma imagem foi carregada. Erros encontrados: ${errors.join(", ")}`
+      `Nenhuma imagem foi carregada. Erros encontrados: ${errors.join(", ")}`,
     );
   }
 
   // Log de avisos se houve erros parciais
   if (errors.length > 0) {
     console.warn(
-      `Algumas imagens não puderam ser carregadas: ${errors.join(", ")}`
+      `Algumas imagens não puderam ser carregadas: ${errors.join(", ")}`,
     );
   }
 
@@ -468,10 +509,10 @@ export async function downloadDeckAsPdf(
   // Calcula se há espaços em branco na última página e preenche com tokens
   const cardsPerPage = config.cols * config.rows;
   const remainder = expandedImages.length % cardsPerPage;
-  
+
   if (remainder > 0 && tokenImages.length > 0) {
     const emptySlots = cardsPerPage - remainder;
-    
+
     // Preenche os espaços em branco com tokens (repetindo se necessário)
     for (let i = 0; i < emptySlots; i++) {
       const tokenIndex = i % tokenImages.length;
@@ -516,12 +557,12 @@ export async function downloadDeckAsPdf(
             x,
             y,
             config.cardWidth,
-            config.cardHeight
+            config.cardHeight,
           );
         } catch (error) {
           console.error(
             `Erro ao adicionar imagem ao PDF: ${cardImage.name}`,
-            error
+            error,
           );
         }
 

@@ -8,7 +8,7 @@ import { Card } from "../../types/card";
  */
 export const getCardByNameAndSetService = async (
   name: string,
-  setCode: string
+  setCode: string,
 ) => {
   const result = await scryfallHttpClient.get<Card>(
     ScryfallEndPoint.namedCard(),
@@ -17,7 +17,7 @@ export const getCardByNameAndSetService = async (
         exact: name,
         set: setCode.toLowerCase(),
       },
-    }
+    },
   );
 
   // Verificação extra: garante que o nome retornado é exatamente igual ao buscado
@@ -25,7 +25,9 @@ export const getCardByNameAndSetService = async (
   if (result.success && result.data.name.toLowerCase() !== name.toLowerCase()) {
     return {
       success: false as const,
-      error: new Error(`Card name mismatch: expected "${name}", got "${result.data.name}"`),
+      error: new Error(
+        `Card name mismatch: expected "${name}", got "${result.data.name}"`,
+      ),
     };
   }
 

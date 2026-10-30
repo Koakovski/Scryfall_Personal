@@ -98,7 +98,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
           .sort(
             (a, b) =>
               new Date(b.released_at).getTime() -
-              new Date(a.released_at).getTime()
+              new Date(a.released_at).getTime(),
           );
         setAllSets(validSets);
       }
@@ -121,7 +121,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
       const filtered = allSets.filter(
         (set) =>
           set.name.toLowerCase().includes(lowerQuery) ||
-          set.code.toLowerCase().includes(lowerQuery)
+          set.code.toLowerCase().includes(lowerQuery),
       );
       setFilteredSets(filtered.slice(0, 50));
     }
@@ -131,7 +131,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
   // Agrupa os sets filtrados por tipo
   const groupedSets: GroupedSets = useMemo(() => {
     const groups: Record<SetType, Set[]> = {} as Record<SetType, Set[]>;
-    
+
     for (const set of filteredSets) {
       if (!groups[set.set_type]) {
         groups[set.set_type] = [];
@@ -177,7 +177,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
       case "ArrowDown":
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev < flatSets.length - 1 ? prev + 1 : prev
+          prev < flatSets.length - 1 ? prev + 1 : prev,
         );
         break;
       case "ArrowUp":
@@ -200,7 +200,7 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
   useEffect(() => {
     if (isOpen && listRef.current && flatSets[highlightedIndex]) {
       const highlightedElement = listRef.current.querySelector(
-        `[data-set-id="${flatSets[highlightedIndex].id}"]`
+        `[data-set-id="${flatSets[highlightedIndex].id}"]`,
       ) as HTMLElement;
       if (highlightedElement) {
         highlightedElement.scrollIntoView({ block: "nearest" });
@@ -302,4 +302,3 @@ const SetAutocomplete: FC<SetAutocompleteProps> = ({
 };
 
 export default SetAutocomplete;
-

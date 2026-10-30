@@ -4,7 +4,7 @@ import { Card } from "../../types/card";
 
 export const getCardByIdService = async (id: string) => {
   const result = await scryfallHttpClient.get<Card>(
-    ScryfallEndPoint.cardById(id)
+    ScryfallEndPoint.cardById(id),
   );
 
   return result;

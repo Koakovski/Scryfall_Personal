@@ -40,11 +40,12 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
         />
       )}
 
-      <div
-        key={card.id}
-        className="relative cursor-pointer group"
-      >
-        <CardItem card={card} isFlipped={isFlipped} onFlipChange={setIsFlipped} />
+      <div key={card.id} className="relative cursor-pointer group">
+        <CardItem
+          card={card}
+          isFlipped={isFlipped}
+          onFlipChange={setIsFlipped}
+        />
 
         {/* Indicador de carta double-faced - sempre visível */}
         {card.isDoubleFaced && (
@@ -75,14 +76,10 @@ const DeckCardItemOptions: FC<DeckCardItemOptionsProps> = ({
         )}
 
         {/* Overlay escuro quando hover */}
-        <div
-          className="absolute inset-0 bg-black rounded-lg transition-opacity duration-200 pointer-events-none opacity-0 group-hover:opacity-60"
-        />
+        <div className="absolute inset-0 bg-black rounded-lg transition-opacity duration-200 pointer-events-none opacity-0 group-hover:opacity-60" />
 
         {/* Botões de ação */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
-        >
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto">
           <button
             onClick={handleDelete}
             className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-lg 

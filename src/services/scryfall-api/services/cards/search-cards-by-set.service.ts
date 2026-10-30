@@ -6,13 +6,13 @@ import { searchCardsService } from "./serch-cards.service";
  * Retorna com unique: "prints" para mostrar todas as variações de impressão
  */
 export const searchCardVariationsBySetService = async (
-  params: SearchCardVariationsBySetParams
+  params: SearchCardVariationsBySetParams,
 ) => {
   // Combina a busca por carta com a coleção
   const cardQuery = params.oracleId
     ? `oracleid:${params.oracleId}`
     : `!"${params.name}"`;
-  
+
   const searchQuery = `${cardQuery} set:${params.setCode}`;
 
   const result = await searchCardsService({
@@ -31,4 +31,3 @@ export type SearchCardVariationsBySetParams = {
   name?: string;
   page?: number;
 };
-

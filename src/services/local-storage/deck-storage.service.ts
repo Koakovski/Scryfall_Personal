@@ -73,7 +73,9 @@ export const deckStorageService = {
     const link = document.createElement("a");
     link.href = url;
     // Sanitiza o nome do deck para nome de arquivo
-    const safeName = deck.name.replace(/[^a-zA-Z0-9\-_\s]/g, "").replace(/\s+/g, "-");
+    const safeName = deck.name
+      .replace(/[^a-zA-Z0-9\-_\s]/g, "")
+      .replace(/\s+/g, "-");
     link.download = `${safeName}-${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(link);
     link.click();
@@ -119,10 +121,13 @@ export const deckStorageService = {
    * Importa decks a partir de uma JSON string (array de decks)
    * Adiciona ao array existente, gerando novos IDs para evitar conflitos
    */
-  importDecksFromJson(jsonString: string): { imported: number; errors: number } {
+  importDecksFromJson(jsonString: string): {
+    imported: number;
+    errors: number;
+  } {
     try {
       const importedDecks = JSON.parse(jsonString) as DeckData[];
-      
+
       if (!Array.isArray(importedDecks)) {
         return { imported: 0, errors: 1 };
       }
@@ -169,4 +174,3 @@ export const deckStorageService = {
     URL.revokeObjectURL(url);
   },
 };
-
