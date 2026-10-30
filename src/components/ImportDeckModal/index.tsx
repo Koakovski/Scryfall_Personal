@@ -112,6 +112,8 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({
     const notFoundCards: string[] = [];
     let processedCount = 0;
 
+    const delayMs = 100;
+
     for (const { quantity, name } of parsedCards) {
       setProgress((prev) => ({
         ...prev!,
@@ -120,6 +122,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({
 
       // Busca a carta uma vez
       const result = await getCardByNameService(name);
+      await delay(delayMs);
 
       if (result.success) {
         const originalCard = result.data;
@@ -137,7 +140,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({
             cardForTokens = preferredResult.data;
           }
           // Delay adicional para a segunda requisição
-          await delay(100);
+          await delay(delayMs);
         }
 
         // Busca os tokens da carta
@@ -145,6 +148,7 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({
           cardForTokens.all_parts ? cardForTokens : originalCard,
           preferredSet?.code,
         );
+        await delay(delayMs);
 
         // Cria uma DeckCardEntity com a quantidade correta e tokens
         const deckCard = DeckCardEntity.new(cardEntity, quantity, tokens);
@@ -164,10 +168,9 @@ const ImportDeckModal: FC<ImportDeckModalProps> = ({
           notFoundCards: [...notFoundCards],
         }));
       }
-
-      // Delay para respeitar rate limit da API do Scryfall (10 req/s)
-      await delay(100);
     }
+
+    await delay(delayMs);
 
     setProgress((prev) => ({
       ...prev!,
